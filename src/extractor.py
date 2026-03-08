@@ -123,4 +123,20 @@ def extract_all(folder_path):
     Returns:
         list של dicts (כמו extract_metadata)
     """
-    pass
+    results = []
+    dir_path = Path(folder_path)
+
+    if not dir_path.is_dir():
+        print(f"Error: {folder_path} is not a valid directory.")
+        return results
+
+    for file_path in dir_path.rglob('*'):
+        if file_path.is_file() and file_path.suffix.lower() in ['.jpg', '.jpeg', '.png', '.tiff']:
+            metadata = extract_metadata(str(file_path))
+            results.append(metadata)
+
+    return results
+
+'''
+ביצוע סריקה לתיקיית תמונות
+'''
