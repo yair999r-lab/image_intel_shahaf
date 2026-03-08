@@ -52,12 +52,16 @@ def datatime(data: dict):
 
 
 def camera_make(data: dict):
-    pass
+    if "Make" in data:
+        return data["Make"].strip("\x00")
 
 
 def camera_model(data: dict):
-    pass
-
+    if "Model" in data:
+        return data["Model"].strip("\x00")
+'''
+שני הפונקציות האחרונות אחראיים לשליפת יצרן ודגם המצלמה
+'''
 
 def extract_metadata(image_path):
     """
