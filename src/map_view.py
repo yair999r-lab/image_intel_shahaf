@@ -15,36 +15,13 @@ map_view.py - יצירת מפה אינטראקטיבית
 
 import folium
 
-
 def sort_by_time(arr):
-    pass
-
-
-def create_map(images_data):
     """
-    יוצר מפה אינטראקטיבית עם כל המיקומים.
-
-    Args:
-        images_data: רשימת מילונים מ-extract_all
-
-    Returns:
-        string של HTML (המפה)
+    פונקציית עזר למיונים:
+    המטרה כאן היא לסדר את התמונות על ציר הזמן (מהישנה לחדשה).
+    השתמשנו בפונקציית 'sorted' המובנית של פייתון.
+    ה-'key' אומר לפייתון לפי איזה שדה למיין - במקרה שלנו "datetime".
+    השתמשנו ב-.get("datetime", "") כדי שאם חסר תאריך לתמונה מסוימת,
+    הקוד לא יקרוס אלא פשוט יתייחס אליה כמחרוזת ריקה.
     """
-    pass
-
-
-
-if __name__ == "__main__":
-    # תיקון: fake_data הועבר לכאן מגוף הקובץ - כדי שלא ירוץ בכל import
-    fake_data = [
-        {"filename": "test1.jpg", "latitude": 32.0853, "longitude": 34.7818,
-         "has_gps": True, "camera_make": "Samsung", "camera_model": "Galaxy S23",
-         "datetime": "2025-01-12 08:30:00"},
-        {"filename": "test2.jpg", "latitude": 31.7683, "longitude": 35.2137,
-         "has_gps": True, "camera_make": "Apple", "camera_model": "iPhone 15 Pro",
-         "datetime": "2025-01-13 09:00:00"},
-    ]
-    html = create_map(fake_data)
-    with open("test_map.html", "w", encoding="utf-8") as f:
-        f.write(html)
-    print("Map saved to test_map.html")
+    return sorted(arr, key=lambda x: x.get("datetime", ""))
