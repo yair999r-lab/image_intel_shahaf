@@ -140,3 +140,11 @@ def extract_all(folder_path):
 '''
 ביצוע סריקה לתיקיית תמונות
 '''
+
+#=========================================================================================#
+
+'''
+הוספת הדפסה סופית להדפסה כולל עיצוב שורות
+'''
+Example = extract_all("C:\\Users\\natan\\Desktop\\pyhton\\X1\\image_intel_shahaf\\images")
+print(*Example, sep='\n')
