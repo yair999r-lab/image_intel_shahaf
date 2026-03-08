@@ -28,7 +28,16 @@ def latitude(data: dict):
 הוספת לוגיקה לחישוב קו רוחב עשרוני
 '''
 def longitude(data: dict):
-    pass
+    if 'GPSInfo' in data and data['GPSInfo']:
+        if 3 in data['GPSInfo'] and 4 in data['GPSInfo']:
+            if data['GPSInfo'][3] == 'E':
+                return float(data['GPSInfo'][4][0] + (data['GPSInfo'][4][1] / 60) + (data['GPSInfo'][4][2] / 3600))
+        elif 1 in data['GPSInfo'] and 2 in data['GPSInfo']:
+            if data['GPSInfo'][1] == 'E':
+                return float(data['GPSInfo'][2][0] + (data['GPSInfo'][2][1] / 60) + (data['GPSInfo'][2][2] / 3600))
+'''
+הוספת לוגיקה לחישוב קו אורך עשרוני
+'''
 
 def datatime(data: dict):
     pass
