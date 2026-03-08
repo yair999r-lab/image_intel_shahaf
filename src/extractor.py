@@ -40,7 +40,15 @@ def longitude(data: dict):
 '''
 
 def datatime(data: dict):
-    pass
+    if "DateTimeOriginal" in data:
+        return data["DateTimeOriginal"]
+    elif "DateTimeDigitized" in data:
+        return data["DateTimeDigitized"]
+    elif "DateTime" in data:
+        return data["DateTime"]
+'''
+הוספת פונקציה לשליפת זמן יצירת התמונה
+'''
 
 
 def camera_make(data: dict):
