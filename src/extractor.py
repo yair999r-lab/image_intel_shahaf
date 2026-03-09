@@ -146,5 +146,5 @@ def extract_all(folder_path):
 '''
 הוספת הדפסה סופית להדפסה כולל עיצוב שורות
 '''
-Example = extract_all("C:\\Users\\natan\\Desktop\\pyhton\\X1\\image_intel_shahaf\\images")
-print(*Example, sep='\n')
+#Example = extract_all("C:\\Users\\natan\\Desktop\\pyhton\\X1\\image_intel_shahaf\\images")
+#print(*Example, sep='\n')

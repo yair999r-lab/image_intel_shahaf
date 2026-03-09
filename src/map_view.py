@@ -43,7 +43,7 @@ def create_map(images_data):
     # שומרים אך ורק תמונות שיש להן 'has_gps' וגם ערכים תקינים של קווי רוחב ואורך.
     gps_images = [
         img for img in images_data
-        if img.get("has_gps")
+        if img.get("has_gps") and img.get("latitude") and img.get("longitude")
     ]
 
     # הגנה מפני קריסה (Edge Case):
@@ -144,8 +144,8 @@ if __name__ == "__main__":
     # אזור בדיקות (Testing):
     # הנתונים כאן משמשים אותנו רק לבדיקה מקומית של הקובץ בזמן הפיתוח.
     # בלוק זה לא ירוץ כאשר צוות אחר יעשה import לקובץ שלנו.
-    dir_path = ""
-    html = create_map(extract_all(dir_path))
+    dir_path = extract_all("C:\Intel\pycharm\pythonProject12\images")
+    html = create_map(dir_path)
     with open("test_map.html", "w", encoding="utf-8") as f:
         f.write(html)
     print("Map saved to test_map.html")
