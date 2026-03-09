@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_7be028e5a2dda824fa9957bd778cbbb3 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+    <div style="position: fixed; bottom: 50px; left: 50px; width: max-content; height: auto; 
+                border:2px solid grey; z-index:9999; font-size:14px; background-color:white; 
+                opacity: 0.9; padding: 10px; border-radius: 5px; direction: ltr;">
+        <h4 style="margin-top: 0; margin-bottom: 5px; text-align: center;">Devices</h4>
+    <div style="margin-bottom: 3px;"><i class="fa fa-map-marker fa-1x" style="color:red"></i> samsung Galaxy A24</div><div style="margin-bottom: 3px;"><i class="fa fa-map-marker fa-1x" style="color:blue"></i> Samsung Galaxy S23</div><div style="margin-bottom: 3px;"><i class="fa fa-map-marker fa-1x" style="color:green"></i> Apple iPhone 15 Pro</div><div style="margin-bottom: 3px;"><i class="fa fa-map-marker fa-1x" style="color:purple"></i> Canon EOS R5</div></div>
+    
+            <div class="folium-map" id="map_7be028e5a2dda824fa9957bd778cbbb3" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_7be028e5a2dda824fa9957bd778cbbb3 = L.map(
+                "map_7be028e5a2dda824fa9957bd778cbbb3",
+                {
+                    center: [31.19904721109259, 34.90442830553704],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 13,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_65b4970c7b90de20bd16ac24cd15a07b = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_65b4970c7b90de20bd16ac24cd15a07b.addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var marker_9a8b57a5388795a8ba6346fb91b71e6d = L.marker(
+                [28.528802999722224, 34.46990149972222],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_55f36f5c927ca20f718282312095ed8d = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_29671a73a9bad2d06f17324871e7f256 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_b4d642e5ec248e4e73eb88fb6d739356 = $(`<div id="html_b4d642e5ec248e4e73eb88fb6d739356" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> 20230803_114132.jpg<br>             <b>Device:</b> samsung Galaxy A24<br>             <b>Time:</b> 2023:08:03 11:41:33         </div>         </div>`)[0];
+                popup_29671a73a9bad2d06f17324871e7f256.setContent(html_b4d642e5ec248e4e73eb88fb6d739356);
+            
+        
+
+        marker_9a8b57a5388795a8ba6346fb91b71e6d.bindPopup(popup_29671a73a9bad2d06f17324871e7f256)
+        ;
+
+        
+    
+    
+            marker_9a8b57a5388795a8ba6346fb91b71e6d.bindTooltip(
+                `<div>
+                     20230803_114132.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_9a8b57a5388795a8ba6346fb91b71e6d.setIcon(icon_55f36f5c927ca20f718282312095ed8d);
+            
+    
+            var marker_255d5aa6a2c2516eee97df3ffdcf80f2 = L.marker(
+                [29.433605166666666, 34.82882308333333],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_71f5983778992766500f0f30d1e1c4c5 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_5e463b8891a6ce3e00a918b7062d3f4c = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_0c3454cc4fbe457150cff2f7a3d6e7ac = $(`<div id="html_0c3454cc4fbe457150cff2f7a3d6e7ac" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> 20230803_125716.jpg<br>             <b>Device:</b> samsung Galaxy A24<br>             <b>Time:</b> 2023:08:03 12:57:16         </div>         </div>`)[0];
+                popup_5e463b8891a6ce3e00a918b7062d3f4c.setContent(html_0c3454cc4fbe457150cff2f7a3d6e7ac);
+            
+        
+
+        marker_255d5aa6a2c2516eee97df3ffdcf80f2.bindPopup(popup_5e463b8891a6ce3e00a918b7062d3f4c)
+        ;
+
+        
+    
+    
+            marker_255d5aa6a2c2516eee97df3ffdcf80f2.bindTooltip(
+                `<div>
+                     20230803_125716.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_255d5aa6a2c2516eee97df3ffdcf80f2.setIcon(icon_71f5983778992766500f0f30d1e1c4c5);
+            
+    
+            var marker_96fb8c6960130b7c0eab343c290355ca = L.marker(
+                [32.0853, 34.7818],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_ed49f7b0e5d859b91138ca72c6ab2ea3 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_6c721ba0bed2c5e7acc271153934be5e = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_bf542d26d0d3b26fd6424c87dd08ed0f = $(`<div id="html_bf542d26d0d3b26fd6424c87dd08ed0f" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_001.jpg<br>             <b>Device:</b> Samsung Galaxy S23<br>             <b>Time:</b> 2025:01:12 08:30:00         </div>         </div>`)[0];
+                popup_6c721ba0bed2c5e7acc271153934be5e.setContent(html_bf542d26d0d3b26fd6424c87dd08ed0f);
+            
+        
+
+        marker_96fb8c6960130b7c0eab343c290355ca.bindPopup(popup_6c721ba0bed2c5e7acc271153934be5e)
+        ;
+
+        
+    
+    
+            marker_96fb8c6960130b7c0eab343c290355ca.bindTooltip(
+                `<div>
+                     IMG_001.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_96fb8c6960130b7c0eab343c290355ca.setIcon(icon_ed49f7b0e5d859b91138ca72c6ab2ea3);
+            
+    
+            var marker_2b35c7a74d17c8f730c36ff521dd2d3c = L.marker(
+                [32.0804, 34.7805],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_b0430c77fd36129734d37a0868bb7bad = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_fec36b15368cde5a164034f4153e1d94 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_80b13b6c4b4d3c1466149d0091f829da = $(`<div id="html_80b13b6c4b4d3c1466149d0091f829da" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_002.jpg<br>             <b>Device:</b> Samsung Galaxy S23<br>             <b>Time:</b> 2025:01:12 11:15:00         </div>         </div>`)[0];
+                popup_fec36b15368cde5a164034f4153e1d94.setContent(html_80b13b6c4b4d3c1466149d0091f829da);
+            
+        
+
+        marker_2b35c7a74d17c8f730c36ff521dd2d3c.bindPopup(popup_fec36b15368cde5a164034f4153e1d94)
+        ;
+
+        
+    
+    
+            marker_2b35c7a74d17c8f730c36ff521dd2d3c.bindTooltip(
+                `<div>
+                     IMG_002.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_2b35c7a74d17c8f730c36ff521dd2d3c.setIcon(icon_b0430c77fd36129734d37a0868bb7bad);
+            
+    
+            var marker_d00c739145625e0f7738e1330427fb2f = L.marker(
+                [32.0667, 34.7667],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_b6b428d6412732caacf43b69cd4cc27b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_b3466858e7cec416e5c2cb0f3ccc0a4e = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_5019b4f4a6811162615f47913c8df08c = $(`<div id="html_5019b4f4a6811162615f47913c8df08c" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_003.jpg<br>             <b>Device:</b> Samsung Galaxy S23<br>             <b>Time:</b> 2025:01:12 14:00:00         </div>         </div>`)[0];
+                popup_b3466858e7cec416e5c2cb0f3ccc0a4e.setContent(html_5019b4f4a6811162615f47913c8df08c);
+            
+        
+
+        marker_d00c739145625e0f7738e1330427fb2f.bindPopup(popup_b3466858e7cec416e5c2cb0f3ccc0a4e)
+        ;
+
+        
+    
+    
+            marker_d00c739145625e0f7738e1330427fb2f.bindTooltip(
+                `<div>
+                     IMG_003.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_d00c739145625e0f7738e1330427fb2f.setIcon(icon_b6b428d6412732caacf43b69cd4cc27b);
+            
+    
+            var marker_a45e653e6174ca9b825cff5df42301cf = L.marker(
+                [31.7683, 35.2137],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_292988c705a905124e9798dcda23c790 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_232e949d179ed9c2c68e91c959c92e31 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_ccf5acc8a7c04351d226663b9ece024e = $(`<div id="html_ccf5acc8a7c04351d226663b9ece024e" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_004.jpg<br>             <b>Device:</b> Apple iPhone 15 Pro<br>             <b>Time:</b> 2025:01:13 09:00:00         </div>         </div>`)[0];
+                popup_232e949d179ed9c2c68e91c959c92e31.setContent(html_ccf5acc8a7c04351d226663b9ece024e);
+            
+        
+
+        marker_a45e653e6174ca9b825cff5df42301cf.bindPopup(popup_232e949d179ed9c2c68e91c959c92e31)
+        ;
+
+        
+    
+    
+            marker_a45e653e6174ca9b825cff5df42301cf.bindTooltip(
+                `<div>
+                     IMG_004.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_a45e653e6174ca9b825cff5df42301cf.setIcon(icon_292988c705a905124e9798dcda23c790);
+            
+    
+            var marker_8fae0be2a84607beda40e7a732ee9199 = L.marker(
+                [31.778, 35.2354],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_c1f6719ba63d72bf56c9ee08be934302 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_942e111d2138385277cb7731b3d08389 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_3504c007f9646baecefb7732e5491b2c = $(`<div id="html_3504c007f9646baecefb7732e5491b2c" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_005.jpg<br>             <b>Device:</b> Apple iPhone 15 Pro<br>             <b>Time:</b> 2025:01:13 12:30:00         </div>         </div>`)[0];
+                popup_942e111d2138385277cb7731b3d08389.setContent(html_3504c007f9646baecefb7732e5491b2c);
+            
+        
+
+        marker_8fae0be2a84607beda40e7a732ee9199.bindPopup(popup_942e111d2138385277cb7731b3d08389)
+        ;
+
+        
+    
+    
+            marker_8fae0be2a84607beda40e7a732ee9199.bindTooltip(
+                `<div>
+                     IMG_005.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_8fae0be2a84607beda40e7a732ee9199.setIcon(icon_c1f6719ba63d72bf56c9ee08be934302);
+            
+    
+            var marker_553d28f5ab256641129b79c572eff7be = L.marker(
+                [31.7742, 35.2258],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_162b550eb4e517d35372577e9bc403e5 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_a9c7e52a75d50eb87f07161f678b3f99 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_3f069793a5cb66dac87ab82942cb5be1 = $(`<div id="html_3f069793a5cb66dac87ab82942cb5be1" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_006.jpg<br>             <b>Device:</b> Apple iPhone 15 Pro<br>             <b>Time:</b> 2025:01:13 16:45:00         </div>         </div>`)[0];
+                popup_a9c7e52a75d50eb87f07161f678b3f99.setContent(html_3f069793a5cb66dac87ab82942cb5be1);
+            
+        
+
+        marker_553d28f5ab256641129b79c572eff7be.bindPopup(popup_a9c7e52a75d50eb87f07161f678b3f99)
+        ;
+
+        
+    
+    
+            marker_553d28f5ab256641129b79c572eff7be.bindTooltip(
+                `<div>
+                     IMG_006.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_553d28f5ab256641129b79c572eff7be.setIcon(icon_162b550eb4e517d35372577e9bc403e5);
+            
+    
+            var marker_583c632e490b5c3e57508fccb0e81ae0 = L.marker(
+                [32.794, 34.9896],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_4840070ce7f8753ad3bcceb5df77a34b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_f8111f3feb90276d7c2ffe2af30a9c46 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_e4c62429b0fca02b7553405e6da50f74 = $(`<div id="html_e4c62429b0fca02b7553405e6da50f74" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_007.jpg<br>             <b>Device:</b> Apple iPhone 15 Pro<br>             <b>Time:</b> 2025:01:14 10:00:00         </div>         </div>`)[0];
+                popup_f8111f3feb90276d7c2ffe2af30a9c46.setContent(html_e4c62429b0fca02b7553405e6da50f74);
+            
+        
+
+        marker_583c632e490b5c3e57508fccb0e81ae0.bindPopup(popup_f8111f3feb90276d7c2ffe2af30a9c46)
+        ;
+
+        
+    
+    
+            marker_583c632e490b5c3e57508fccb0e81ae0.bindTooltip(
+                `<div>
+                     IMG_007.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_583c632e490b5c3e57508fccb0e81ae0.setIcon(icon_4840070ce7f8753ad3bcceb5df77a34b);
+            
+    
+            var marker_a6888a91fe27ef74a7cafc004f2c0b4d = L.marker(
+                [32.8115, 34.9986],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_292072d5db7ef1ef84da6ff411b77513 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "purple",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_c2045667123ef27af7fc212c02d20e5b = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_d245a8fd1f726e0c06fd01a871ddf489 = $(`<div id="html_d245a8fd1f726e0c06fd01a871ddf489" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_008.jpg<br>             <b>Device:</b> Canon EOS R5<br>             <b>Time:</b> 2025:01:14 13:30:00         </div>         </div>`)[0];
+                popup_c2045667123ef27af7fc212c02d20e5b.setContent(html_d245a8fd1f726e0c06fd01a871ddf489);
+            
+        
+
+        marker_a6888a91fe27ef74a7cafc004f2c0b4d.bindPopup(popup_c2045667123ef27af7fc212c02d20e5b)
+        ;
+
+        
+    
+    
+            marker_a6888a91fe27ef74a7cafc004f2c0b4d.bindTooltip(
+                `<div>
+                     IMG_008.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_a6888a91fe27ef74a7cafc004f2c0b4d.setIcon(icon_292072d5db7ef1ef84da6ff411b77513);
+            
+    
+            var marker_6b2fd01dc331592ed099e124f0e57117 = L.marker(
+                [31.253, 34.7915],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_0eb240149404b826a6e97255b6001b00 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_00d6d98abe7532ca9302e8a5a83c9a64 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_5c8f99e8af786b686b45a966c35c428d = $(`<div id="html_5c8f99e8af786b686b45a966c35c428d" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_009.jpg<br>             <b>Device:</b> Samsung Galaxy S23<br>             <b>Time:</b> 2025:01:15 09:30:00         </div>         </div>`)[0];
+                popup_00d6d98abe7532ca9302e8a5a83c9a64.setContent(html_5c8f99e8af786b686b45a966c35c428d);
+            
+        
+
+        marker_6b2fd01dc331592ed099e124f0e57117.bindPopup(popup_00d6d98abe7532ca9302e8a5a83c9a64)
+        ;
+
+        
+    
+    
+            marker_6b2fd01dc331592ed099e124f0e57117.bindTooltip(
+                `<div>
+                     IMG_009.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_6b2fd01dc331592ed099e124f0e57117.setIcon(icon_0eb240149404b826a6e97255b6001b00);
+            
+    
+            var marker_80c1cd1a016f57204adecf9eae54b125 = L.marker(
+                [31.253, 34.7915],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_fe5bfae2959ef88bcbd8a144e6e233c7 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_73359a1ff69b86be9136dc25934d981f = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_bc64687ee90dac5de5420061c92d70ea = $(`<div id="html_bc64687ee90dac5de5420061c92d70ea" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_009.jpg<br>             <b>Device:</b> Samsung Galaxy S23<br>             <b>Time:</b> 2025:01:15 09:30:00         </div>         </div>`)[0];
+                popup_73359a1ff69b86be9136dc25934d981f.setContent(html_bc64687ee90dac5de5420061c92d70ea);
+            
+        
+
+        marker_80c1cd1a016f57204adecf9eae54b125.bindPopup(popup_73359a1ff69b86be9136dc25934d981f)
+        ;
+
+        
+    
+    
+            marker_80c1cd1a016f57204adecf9eae54b125.bindTooltip(
+                `<div>
+                     IMG_009.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_80c1cd1a016f57204adecf9eae54b125.setIcon(icon_fe5bfae2959ef88bcbd8a144e6e233c7);
+            
+    
+            var marker_03fca1ade459e8dc5d511bed7ebfdd10 = L.marker(
+                [31.262, 34.8013],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_44fd99362ede51f02f4ef9426b811239 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_e4677cd4094ba2e9189c8b942f0276a0 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_88d5511a0ff02b70d1403bda79734d5c = $(`<div id="html_88d5511a0ff02b70d1403bda79734d5c" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_010.jpg<br>             <b>Device:</b> Samsung Galaxy S23<br>             <b>Time:</b> 2025:01:15 14:00:00         </div>         </div>`)[0];
+                popup_e4677cd4094ba2e9189c8b942f0276a0.setContent(html_88d5511a0ff02b70d1403bda79734d5c);
+            
+        
+
+        marker_03fca1ade459e8dc5d511bed7ebfdd10.bindPopup(popup_e4677cd4094ba2e9189c8b942f0276a0)
+        ;
+
+        
+    
+    
+            marker_03fca1ade459e8dc5d511bed7ebfdd10.bindTooltip(
+                `<div>
+                     IMG_010.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_03fca1ade459e8dc5d511bed7ebfdd10.setIcon(icon_44fd99362ede51f02f4ef9426b811239);
+            
+    
+            var marker_0be3b7753cabbdd70e5aa24391e1e23c = L.marker(
+                [29.5569, 34.9498],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_31e2953bc651dd03ed2301a259d9c46a = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_4280d3f172e73140f2882cb126653c63 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_e34d8d8483f3886a1391d72c908e5e75 = $(`<div id="html_e34d8d8483f3886a1391d72c908e5e75" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_011.jpg<br>             <b>Device:</b> Samsung Galaxy S23<br>             <b>Time:</b> 2025:01:16 11:00:00         </div>         </div>`)[0];
+                popup_4280d3f172e73140f2882cb126653c63.setContent(html_e34d8d8483f3886a1391d72c908e5e75);
+            
+        
+
+        marker_0be3b7753cabbdd70e5aa24391e1e23c.bindPopup(popup_4280d3f172e73140f2882cb126653c63)
+        ;
+
+        
+    
+    
+            marker_0be3b7753cabbdd70e5aa24391e1e23c.bindTooltip(
+                `<div>
+                     IMG_011.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_0be3b7753cabbdd70e5aa24391e1e23c.setIcon(icon_31e2953bc651dd03ed2301a259d9c46a);
+            
+    
+            var marker_da0c205c4e3ac3f7837e8c27cccd0567 = L.marker(
+                [29.54, 34.9415],
+                {
+}
+            ).addTo(map_7be028e5a2dda824fa9957bd778cbbb3);
+        
+    
+            var icon_70f2a6d7f809552ad33a68cf42c4c876 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "camera",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_d183dbd35ee5af25b6928bfed334726e = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_72e31af970ea60aef4c7318e1e3a5a14 = $(`<div id="html_72e31af970ea60aef4c7318e1e3a5a14" style="width: 100.0%; height: 100.0%;">         <div style='direction:ltr; font-family:sans-serif;'>             <b>File:</b> IMG_012.jpg<br>             <b>Device:</b> Apple iPhone 15 Pro<br>             <b>Time:</b> 2025:01:16 15:30:00         </div>         </div>`)[0];
+                popup_d183dbd35ee5af25b6928bfed334726e.setContent(html_72e31af970ea60aef4c7318e1e3a5a14);
+            
+        
+
+        marker_da0c205c4e3ac3f7837e8c27cccd0567.bindPopup(popup_d183dbd35ee5af25b6928bfed334726e)
+        ;
+
+        
+    
+    
+            marker_da0c205c4e3ac3f7837e8c27cccd0567.bindTooltip(
+                `<div>
+                     IMG_012.jpg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_da0c205c4e3ac3f7837e8c27cccd0567.setIcon(icon_70f2a6d7f809552ad33a68cf42c4c876);
+            
+</script>
+</html>
