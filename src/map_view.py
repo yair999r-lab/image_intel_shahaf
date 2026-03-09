@@ -12,7 +12,7 @@ map_view.py - יצירת מפה אינטראקטיבית
 5. תיקון color_index - היה מתקדם על כל תמונה במקום רק על מכשיר חדש
 6. הוספת מקרא מכשירים
 """
-
+from extractor import *
 import folium
 
 def sort_by_time(arr):
@@ -24,7 +24,7 @@ def sort_by_time(arr):
     השתמשנו ב-.get("datetime", "") כדי שאם חסר תאריך לתמונה מסוימת,
     הקוד לא יקרוס אלא פשוט יתייחס אליה כמחרוזת ריקה.
     """
-    return sorted(arr, key=lambda x: x.get("datetime", ""))
+    return sorted(arr, key=lambda x: x.get("datetime") or "")
 
 
 def create_map(images_data):
@@ -43,7 +43,7 @@ def create_map(images_data):
     # שומרים אך ורק תמונות שיש להן 'has_gps' וגם ערכים תקינים של קווי רוחב ואורך.
     gps_images = [
         img for img in images_data
-        if img.get("has_gps") and img.get("latitude") and img.get("longitude")
+        if img.get("has_gps")
     ]
 
     # הגנה מפני קריסה (Edge Case):
@@ -144,15 +144,8 @@ if __name__ == "__main__":
     # אזור בדיקות (Testing):
     # הנתונים כאן משמשים אותנו רק לבדיקה מקומית של הקובץ בזמן הפיתוח.
     # בלוק זה לא ירוץ כאשר צוות אחר יעשה import לקובץ שלנו.
-    fake_data = [
-        {"filename": "test1.jpg", "latitude": 32.0853, "longitude": 34.7818,
-         "has_gps": True, "camera_make": "Samsung", "camera_model": "Galaxy S23",
-         "datetime": "2025-01-12 08:30:00"},
-        {"filename": "test2.jpg", "latitude": 31.7683, "longitude": 35.2137,
-         "has_gps": True, "camera_make": "Apple", "camera_model": "iPhone 15 Pro",
-         "datetime": "2025-01-13 09:00:00"},
-    ]
-    html = create_map(fake_data)
+    dir_path = ""
+    html = create_map(extract_all(dir_path))
     with open("test_map.html", "w", encoding="utf-8") as f:
         f.write(html)
     print("Map saved to test_map.html")
