@@ -13,27 +13,55 @@ extractor.py - שליפת EXIF מתמונות
 
 
 def has_gps(data: dict):
-    pass
+    return 'GPSInfo' in data
 
 
 def latitude(data: dict):
-    pass
-
-
+    if 'GPSInfo' in data and data['GPSInfo']:
+        if 1 in data['GPSInfo'] and 2 in data['GPSInfo']:
+            if data['GPSInfo'][1] == 'N':
+                return float(data['GPSInfo'][2][0] + (data['GPSInfo'][2][1] / 60) + (data['GPSInfo'][2][2] / 3600))
+        elif 3 in data['GPSInfo'] and 4 in data['GPSInfo']:
+            if data['GPSInfo'][3] == 'N':
+                return float(data['GPSInfo'][4][0] + (data['GPSInfo'][4][1] / 60) + (data['GPSInfo'][4][2] / 3600))
+'''
+הוספת לוגיקה לחישוב קו רוחב עשרוני
+'''
 def longitude(data: dict):
-    pass
+    if 'GPSInfo' in data and data['GPSInfo']:
+        if 3 in data['GPSInfo'] and 4 in data['GPSInfo']:
+            if data['GPSInfo'][3] == 'E':
+                return float(data['GPSInfo'][4][0] + (data['GPSInfo'][4][1] / 60) + (data['GPSInfo'][4][2] / 3600))
+        elif 1 in data['GPSInfo'] and 2 in data['GPSInfo']:
+            if data['GPSInfo'][1] == 'E':
+                return float(data['GPSInfo'][2][0] + (data['GPSInfo'][2][1] / 60) + (data['GPSInfo'][2][2] / 3600))
+'''
+הוספת לוגיקה לחישוב קו אורך עשרוני
+'''
 
 def datatime(data: dict):
-    pass
+    if "DateTimeOriginal" in data:
+        return data["DateTimeOriginal"]
+    elif "DateTimeDigitized" in data:
+        return data["DateTimeDigitized"]
+    elif "DateTime" in data:
+        return data["DateTime"]
+'''
+הוספת פונקציה לשליפת זמן יצירת התמונה
+'''
 
 
 def camera_make(data: dict):
-    pass
+    if "Make" in data:
+        return data["Make"].strip("\x00")
 
 
 def camera_model(data: dict):
-    pass
-
+    if "Model" in data:
+        return data["Model"].strip("\x00")
+'''
+שני הפונקציות האחרונות אחראיים לשליפת יצרן ודגם המצלמה
+'''
 
 def extract_metadata(image_path):
     """
@@ -95,4 +123,28 @@ def extract_all(folder_path):
     Returns:
         list של dicts (כמו extract_metadata)
     """
-    pass
+    results = []
+    dir_path = Path(folder_path)
+
+    if not dir_path.is_dir():
+        print(f"Error: {folder_path} is not a valid directory.")
+        return results
+
+    for file_path in dir_path.rglob('*'):
+        if file_path.is_file() and file_path.suffix.lower() in ['.jpg', '.jpeg', '.png', '.tiff']:
+            metadata = extract_metadata(str(file_path))
+            results.append(metadata)
+
+    return results
+
+'''
+ביצוע סריקה לתיקיית תמונות
+'''
+
+#=========================================================================================#
+
+'''
+הוספת הדפסה סופית להדפסה כולל עיצוב שורות
+'''
+Example = extract_all("C:\\Users\\natan\\Desktop\\pyhton\\X1\\image_intel_shahaf\\images")
+print(*Example, sep='\n')
