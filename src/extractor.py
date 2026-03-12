@@ -18,23 +18,42 @@ def has_gps(data: dict):
 
 def latitude(data: dict):
     if 'GPSInfo' in data and data['GPSInfo']:
+        # קו רוחב תמיד יושב על מפתחות 1 (Ref) ו-2 (Data)
         if 1 in data['GPSInfo'] and 2 in data['GPSInfo']:
+            lat = data['GPSInfo'][2]
+            decimal_lat = float(lat[0]) + (float(lat[1]) / 60) + (float(lat[2]) / 3600)
+
+            # בדיקה רגילה: צפון
             if data['GPSInfo'][1] == 'N':
-                return float(data['GPSInfo'][2][0] + (data['GPSInfo'][2][1] / 60) + (data['GPSInfo'][2][2] / 3600))
-        elif 3 in data['GPSInfo'] and 4 in data['GPSInfo']:
-            if data['GPSInfo'][3] == 'N':
-                return float(data['GPSInfo'][4][0] + (data['GPSInfo'][4][1] / 60) + (data['GPSInfo'][4][2] / 3600))
-'''
-הוספת לוגיקה לחישוב קו רוחב עשרוני
-'''
+                return decimal_lat
+            # הפולבק: דרום (באותם מפתחות בדיוק)
+            elif data['GPSInfo'][1] == 'S':
+                return -decimal_lat
+
+            # מקרה קצה (אם חסרה האות אבל יש נתונים)
+            return decimal_lat
+
+    return None
+
+
 def longitude(data: dict):
     if 'GPSInfo' in data and data['GPSInfo']:
+        # קו אורך תמיד יושב על מפתחות 3 (Ref) ו-4 (Data)
         if 3 in data['GPSInfo'] and 4 in data['GPSInfo']:
+            lon = data['GPSInfo'][4]
+            decimal_lon = float(lon[0]) + (float(lon[1]) / 60) + (float(lon[2]) / 3600)
+
+            # בדיקה רגילה: מזרח
             if data['GPSInfo'][3] == 'E':
-                return float(data['GPSInfo'][4][0] + (data['GPSInfo'][4][1] / 60) + (data['GPSInfo'][4][2] / 3600))
-        elif 1 in data['GPSInfo'] and 2 in data['GPSInfo']:
-            if data['GPSInfo'][1] == 'E':
-                return float(data['GPSInfo'][2][0] + (data['GPSInfo'][2][1] / 60) + (data['GPSInfo'][2][2] / 3600))
+                return decimal_lon
+            # הפולבק: מערב (באותם מפתחות בדיוק)
+            elif data['GPSInfo'][3] == 'W':
+                return -decimal_lon
+
+            # מקרה קצה
+            return decimal_lon
+
+    return None
 '''
 הוספת לוגיקה לחישוב קו אורך עשרוני
 '''
