@@ -65,3 +65,49 @@ def prepare_camera_data(raw_data):
 
     return df_clean
 
+
+def create_pro_scatter(df_clean):
+    """מייצרת את קנבס הגרף עם הנקודות והעיצוב המקצועי"""
+
+    # חישוב גובה: ככל שיש יותר מכשירים (קומות), הגרף ימתח כדי שלא יהיה צפוף
+    num_rows = len(df_clean['display_name'].unique())
+    dynamic_height = max(450, num_rows * 80)
+
+    # פקודת הציור המרכזית של פלוטלי
+    fig = px.scatter(
+        df_clean, x='datetime', y='display_name',
+        color='display_name',  # בוחר צבע שונה לכל קומה
+        text='marker_text',
+        # מכניסים בסתר נתונים נוספים שישמשו את חלונית הריחוף
+        custom_data=['filename', 'make_model', 'coords'],
+        color_discrete_sequence=px.colors.qualitative.Prism
+    )
+
+    # עיצוב מותאם אישית לחלונית הריחוף (עם שילוב HTML לאימוג'ים וצבעים)
+    fig.update_traces(
+        hovertemplate="""
+        <span style="font-size:16px; font-weight:bold; color:#00CCFF;">%{customdata[0]}</span><br>
+        📅 %{x|%d/%m/%Y %H:%M}<br>
+        📍 %{customdata[2]}<br>
+        📸 %{customdata[1]}
+        <extra></extra>
+        """,
+        marker=dict(size=35, line=dict(width=2, color='white'), opacity=0.9),
+        textposition='bottom center',
+        textfont=dict(size=12, color='white')
+    )
+
+    # עיצוב חלון האפליקציה: רקעים כהים וטקסטים בעברית/אנגלית
+    fig.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="#111217", plot_bgcolor="#111217",
+        font=dict(family="Assistant, Segoe UI, sans-serif", size=14),
+        height=dynamic_height,
+        margin=dict(l=20, r=20, t=80, b=20),
+        title={'text': "<b>ציר זמן צילום - ממופה לפי מכשיר</b>", 'y': 0.96, 'x': 0.5,
+               'font': {'size': 24, 'color': '#00CCFF'}},
+        xaxis=dict(gridcolor='rgba(255,255,255,0.05)', title="ציר זמן"),
+        yaxis=dict(gridcolor='rgba(255,255,255,0.1)', title="", tickfont={'size': 16}),
+        showlegend=False
+    )
+    return fig
