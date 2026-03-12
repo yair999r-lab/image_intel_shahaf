@@ -144,7 +144,7 @@ if __name__ == "__main__":
     # אזור בדיקות (Testing):
     # הנתונים כאן משמשים אותנו רק לבדיקה מקומית של הקובץ בזמן הפיתוח.
     # בלוק זה לא ירוץ כאשר צוות אחר יעשה import לקובץ שלנו.
-    dir_path = "C:\\Users\\natan\\Desktop\\pyhton\\X1\\image_intel_shahaf\\images"
+    dir_path = "C:\\Users\\bnf05\\PycharmProjects\\end_project\\image_intel_shahaf\\images"
     html = create_map(extract_all(dir_path))
     with open("test_map.html", "w", encoding="utf-8") as f:
         f.write(html)
