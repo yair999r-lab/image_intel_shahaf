@@ -202,3 +202,12 @@ def analyze(images_data):
         "per_camera_range": per_camera_range,
         "insights": insights
     }
+
+if __name__ == "__main__":
+    # --- אזור בדיקות ---
+    # הבלוק הזה ירוץ רק אם נריץ את הקובץ הזה ישירות, ולא יפריע לשאר הפרויקט.
+    # זה מאפשר לנו לבדוק את הקוד שלנו עם נתונים מזויפים לפני שאנחנו מחברים הכל.
+
+    dir_path = ""
+    # מדפיס את המילון שיצרנו בצורה יפה ומסודרת לטרמינל כדי שנוכל לקרוא אותו
+    print(json.dumps(analyze(extract_all(dir_path)), indent=4, ensure_ascii=False))
