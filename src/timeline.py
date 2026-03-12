@@ -19,3 +19,13 @@ LOGO_FILES = {
     "Xiaomi": "Xiaomi-logo.png",
     "Unknown": "purepng.com-camera-iconsymbolsiconsapple-iosiosios-8-iconsios-8-72152259602494tzv.png"
 }
+LOGO_FILES_LOWER = {key.lower(): value for key, value in LOGO_FILES.items()}
+
+def get_b64_image(image_path):
+    """מקבלת נתיב לתמונה ומחזירה אותה כמחרוזת טקסט (Base64)"""
+    try:
+        with open(image_path, "rb") as img_file:
+            # הקידוד המיוחד שאומר לדפדפן: "זו תמונה, תציג אותה"
+            return "data:image/png;base64," + base64.b64encode(img_file.read()).decode('utf-8')
+    except Exception:
+        return None
