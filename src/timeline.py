@@ -111,3 +111,34 @@ def create_pro_scatter(df_clean):
         showlegend=False
     )
     return fig
+
+
+# --- תחנה 3: הזרקת לוגואים ---
+def add_icons_to_graph(fig, df_clean, logo_dict, icons_path):
+    """עוברת נקודה-נקודה ומדביקה עליה לוגו רלוונטי במידה ויש בתיקייה"""
+    for _, row in df_clean.iterrows():
+
+        # הופכים לאותיות קטנות לצורך החיפוש במילון
+        make = str(row['camera_make']).lower()
+
+        # אם היצרן קיים במילון ניקח אותו, אם לא - נשתמש בלוגו של Unknown
+        logo_key = make if make in logo_dict else "unknown"
+
+        # מחברים את התיקייה לשם הקובץ שמצאנו
+        full_path = icons_path / logo_dict[logo_key]
+
+        if full_path.exists():
+            # שולפים את המידע המקודד (Base64) של התמונה
+            b64_str = get_b64_image(full_path)
+
+            if b64_str:
+                # מדביקים את התמונה מעל הנקודה
+                fig.add_layout_image(
+                    source=b64_str,
+                    x=row['datetime'], y=row['display_name'],
+                    xref="x", yref="y", xanchor="center", yanchor="middle",
+                    sizex=1000 * 60 * 60 * 12,  # רוחב: 12 שעות
+                    sizey=0.9, layer="above",
+                    sizing="contain"
+                )
+    return fig
