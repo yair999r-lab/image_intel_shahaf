@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניתוח תמונה בודדת</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .info-card { background: #161b22; border: 1px solid #58a6ff; border-radius: 15px; padding: 30px; width: 400px; box-shadow: 0 0 15px rgba(88, 166, 255, 0.1); }
+        h2 { color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 10px; margin-top: 0; text-align: center; }
+        .data-row { display: flex; justify-content: space-between; margin: 15px 0; padding: 10px; background: #0d1117; border-radius: 5px; border-right: 3px solid #58a6ff; }
+        .data-label { color: #8b949e; }
+        .data-value { color: #e6edf3; font-weight: bold; direction: ltr; }
+        .btn-container { text-align: center; margin-top: 25px; }
+        .cyber-btn { background: transparent; border: 1px solid #39ff14; color: #39ff14; padding: 10px 20px; text-decoration: none; border-radius: 5px; transition: 0.3s; }
+        .cyber-btn:hover { background: #39ff14; color: #000; box-shadow: 0 0 10px #39ff14; }
+    </style>
+</head>
+<body>
+    <div class="info-card">
+        <h2><i class="fas fa-fingerprint"></i> זיהוי אובייקט בודד</h2>
+        
+        <div class="data-row">
+            <span class="data-label"><i class="fas fa-file-image"></i> שם קובץ:</span>
+            <span class="data-value">{{ data.filename }}</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label"><i class="fas fa-calendar-alt"></i> תאריך צילום:</span>
+            <span class="data-value">{{ data.datetime }}</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label"><i class="fas fa-camera"></i> מצלמה:</span>
+            <span class="data-value">{{ data.camera_make }} {{ data.camera_model }}</span>
+        </div>
+
+        <div class="btn-container">
+            <a href="/" class="cyber-btn"><i class="fas fa-search"></i> סריקה חדשה</a>
+        </div>
+    </div>
+</body>
+</html>
