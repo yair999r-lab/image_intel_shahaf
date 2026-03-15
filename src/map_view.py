@@ -51,7 +51,7 @@ def create_map(images_data):
     # אי אפשר לחשב מרכז מפה (זה יגרום לשגיאת חלוקה באפס).
     # לכן אנחנו עוצרים כאן ומחזירים הודעת שגיאה נקייה ומעוצבת.
     if not gps_images:
-        return "<h3 style='text-align: center; color: red;'>No valid GPS data found</h3>"
+        return False , ""
 
     # 2. סידור כרונולוגי:
     # קוראים לפונקציית העזר שלנו כדי שהתמונות יופיעו בצורה מסודרת.
@@ -137,15 +137,25 @@ def create_map(images_data):
     # 8. החזרת התוצאה:
     # חוזה הממשקים (API Contract) מחייב להחזיר מחרוזת HTML טהורה ולא לשמור קובץ,
     # כדי שהאפליקציה של הצוות המקביל תוכל להציג את זה ברשת בצורה חלקה.
-    return m.get_root().render()
+    return True,m.get_root().render()
 
 
 if __name__ == "__main__":
-    # אזור בדיקות (Testing):
-    # הנתונים כאן משמשים אותנו רק לבדיקה מקומית של הקובץ בזמן הפיתוח.
-    # בלוק זה לא ירוץ כאשר צוות אחר יעשה import לקובץ שלנו.
-    dir_path = "C:\\Users\\bnf05\\PycharmProjects\\end_project\\image_intel_shahaf\\images"
-    html = create_map(extract_all(dir_path))
-    with open("test_map.html", "w", encoding="utf-8") as f:
-        f.write(html)
-    print("Map saved to test_map.html")
+    # ייבוא זמני רק בשביל הבדיקה המקומית
+    from extractor import extract_all
+
+    MY_PHOTOS_PATH = r"C:/Intel/pycharm/pythonProject12/images"
+    print("מתחיל שאיבת נתונים לבדיקת מפה...")
+
+    test_data = extract_all(MY_PHOTOS_PATH)
+
+    # תופסים את ה-Tuple
+    success, map_html = create_map(test_data)
+
+    if success:
+        print("✅ המפה נוצרה בהצלחה!")
+        # שומרים קובץ רק לבדיקה מקומית
+        with open("test_map.html", "w", encoding="utf-8") as f:
+            f.write(map_html)
+    else:
+        print("🛑 אין תמונות עם GPS בתיקייה (חזר False).")

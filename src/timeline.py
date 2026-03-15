@@ -144,30 +144,16 @@ def add_icons_to_graph(fig, df_clean, logo_dict, icons_path):
     return fig
 
 
-# --- הפונקציה המנהלת (ה"מנצח") ---
-def generate_camera_dashboard(target_folder):
+def generate_camera_dashboard(raw_data):
     """מריצה את כל השלבים לפי הסדר ומוציאה HTML"""
-    print("⏳ מחלץ נתונים מהתמונות...")
-
-    # 1. מנסים לחלץ נתונים - ה-try תופס קריסות פתאומיות של המערכת
-    try:
-        raw_data = extract_all(target_folder)
-    except Exception as e:
-        print(f"❌ שגיאה קריטית בזמן חילוץ הנתונים (בדוק הרשאות או נתיב): {e}")
-        return
-
-    # 2. מוודאים שחזרו נתונים לפני שממשיכים
-    if not raw_data:
-        # במקרה כזה אנחנו רק מסיימים, כי הודעת השגיאה ("לא תיקייה חוקית") כבר הודפסה מקובץ ה-extractor
-        return
 
     print("📊 מעבד נתונים...")
     df_ready = prepare_camera_data(raw_data)
 
     # 3. מוודאים שיש מה לצייר גם אחרי שניקינו תמונות שבורות
-    if df_ready is None:
+    if df_ready is None or len(df_ready) < 2:
         print("🛑 כל התמונות סוננו (ללא זמן צילום תקין), לא נשארו נתונים לגרף.")
-        return
+        return False, ""
 
     print("🎨 בונה גרף מעוצב...")
     fig = create_pro_scatter(df_ready)
@@ -175,18 +161,28 @@ def generate_camera_dashboard(target_folder):
     print("🖼️ מטמיע לוגואים (Base64)...")
     fig = add_icons_to_graph(fig, df_ready, LOGO_FILES_LOWER, ICONS_DIR)
 
-    # 4. שומרים הכל לקובץ HTML יחיד ועצמאי
-    output_filename = "camera_pro_timeline.html"
-    fig.write_html(output_filename, full_html=True, include_plotlyjs='cdn')
-    print(f"✅ הצלחה! הקובץ {output_filename} נוצר באותה התיקייה.")
 
+    print("✅ הגרף מוכן! מוסר בחזרה לשרת.")
+    html_string = fig.to_html(full_html=False, include_plotlyjs='cdn')
+    return True, html_string
 
 # ==========================================
 # אזור ההפעלה
 # ==========================================
 if __name__ == "__main__":
-    # שנה כאן לנתיב התיקייה שבה נמצאות התמונות שלך
-    MY_PHOTOS_PATH = r"C:/Intel/pycharm/pythonProject12/images"
 
-    # מפעילים את המכונה!
-    generate_camera_dashboard(MY_PHOTOS_PATH)
+    from extractor import extract_all
+    MY_PHOTOS_PATH = r"C:/Intel/pycharm/pythonProject12/images"
+    print("מתחיל בדיקה מקומית...")
+
+    test_data = extract_all(MY_PHOTOS_PATH)
+
+    success, html_result = generate_camera_dashboard(test_data)
+
+    if success:
+        print("✅ הגרף נוצר בהצלחה בזיכרון!")
+
+        with open("test_timeline.html", "w", encoding="utf-8") as f:
+            f.write(html_result)
+    else:
+        print("🛑 הבדיקה נכשלה או שאין מספיק נתונים (חזר False).")
