@@ -5,6 +5,7 @@ analyzer.py - מציאת דפוסים ותובנות
 import json
 from datetime import datetime
 from extractor import extract_all
+
 def detect_camera_switches(images_data):
     """
     פונקציית עזר: מזהה מתי הסוכן החליף מכשיר בין צילום לצילום.
@@ -71,7 +72,8 @@ def detect_time_gaps(images_data):
         # אם ההפרש גדול מ-12 שעות, מצאנו פער חשוד!
         if diff_hours > 12:
             date_only = curr_str.split(" ")[0]
-            gaps.append(f"פער זמן חריג: זוהה נתק של {int(diff_hours)} שעות לפני הצילום ב-{date_only} במכשיר {full_name}")
+            # [שדרוג ל-HTML] עודכנה הקידומת כדי שייפול לקטגוריית פערים
+            gaps.append(f"פער בין תמונות: זוהה נתק של {int(diff_hours)} שעות לפני הצילום ב-{date_only} במכשיר {full_name}")
     return gaps
 
 def analyze(images_data):
@@ -164,26 +166,29 @@ def analyze(images_data):
             "first_picture": sorted_cam_dates[0].split(" ")[0],
             "last_picture": sorted_cam_dates[-1].split(" ")[0]
         }
-# --- חלק 5: יצירת התובנות (Insights) ---
+
+    # --- חלק 5: יצירת התובנות (Insights) ---
 
     insights = []
 
     # תובנה על טווח השימוש של כל מכשיר
     for camera, range_info in per_camera_range.items():
-        msg = f"המכשיר {camera} היה בשימוש מ-{range_info['first_picture']} עד {range_info['last_picture']}"
+        # [שדרוג ל-HTML] עודכנה הקידומת לקטגוריית הזמן
+        msg = f"זמן שימוש: המכשיר {camera} היה בשימוש מ-{range_info['first_picture']} עד {range_info['last_picture']}"
         insights.append(msg)
 
     # תובנה 1: אם ראינו יותר ממצלמה אחת, נתריע על זה
     if len(unique_cameras) > 1:
-        insights.append(f"נמצאו {len(unique_cameras)} מכשירים שונים - ייתכן שהסוכן החליף מכשירים במכוון")
+        # [שדרוג ל-HTML] עודכנה הקידומת להחלפת ציוד
+        insights.append(f"החלפת מכשיר: נמצאו {len(unique_cameras)} מכשירים שונים - ייתכן שהסוכן החליף מכשירים במכוון")
 
     # תובנה 2: מפעילים את הפונקציה שכתבנו למעלה כדי למצוא החלפות מדויקות
     switches = detect_camera_switches(images_data)
     for switch in switches:
         # לוקחים רק את התאריך מהזמן המדויק
         date_only = switch["date"].split(" ")[0]
-        # מוסיפים את המשפט לרשימת התובנות
-        insights.append(f"ב-{date_only} הסוכן עבר ממכשיר {switch['from']} ל-{switch['to']}")
+        # מוסיפים את המשפט לרשימת התובנות - [שדרוג ל-HTML] עודכנה הקידומת
+        insights.append(f"החלפת מכשיר: ב-{date_only} הסוכן עבר ממכשיר {switch['from']} ל-{switch['to']}")
 
     # תובנה 3: הוספת פערי הזמן החריגים שזיהינו
     time_gaps = detect_time_gaps(images_data)
