@@ -1,188 +1,59 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html dir="rtl" lang="he">
 <head>
     <meta charset="UTF-8">
-    <!-- תיקון: היה initial-width=1.0 במקום initial-scale=1.0 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Intel - מודיעין חזותי</title>
+    <title>מערכת חקירת תמונות - חיפוש</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --container-bg: #1e293b;
-            --text-color: #f8fafc;
-            --accent-color: #38bdf8;
-            --accent-hover: #0284c7;
-            --border-color: #475569;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;
         }
-
-        .container {
-            background-color: var(--container-bg);
-            padding: 50px;
-            border-radius: 16px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
-            width: 100%;
-            max-width: 550px;
-            text-align: center;
+        .cyber-card {
+            background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(10px);
+            border: 1px solid #39ff14; border-radius: 15px; padding: 40px; width: 100%; max-width: 500px;
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.15); text-align: center;
         }
-
-        h1 {
-            color: var(--accent-color);
-            font-size: 2.8em;
-            margin-bottom: 10px;
-            margin-top: 0;
-            letter-spacing: 2px;
+        h1 { color: #39ff14; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; }
+        .input-group { position: relative; margin-bottom: 25px; }
+        .input-group i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #8b949e; }
+        input[type="text"] {
+            width: 100%; padding: 15px 45px 15px 15px; background: #010409; border: 1px solid #30363d;
+            border-radius: 8px; color: #58a6ff; font-size: 16px; box-sizing: border-box; transition: 0.3s;
         }
-
-        p {
-            color: #94a3b8;
-            font-size: 1.1em;
-            margin-bottom: 40px;
+        input[type="text"]:focus { border-color: #39ff14; outline: none; box-shadow: 0 0 10px rgba(57, 255, 20, 0.3); }
+        .cyber-btn {
+            background: transparent; border: 2px solid #39ff14; color: #39ff14; padding: 15px 30px;
+            font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; width: 100%;
         }
-
-        .file-drop-area {
-            border: 2px dashed var(--border-color);
-            border-radius: 12px;
-            padding: 50px 20px;
-            margin-bottom: 25px;
-            transition: all 0.3s ease;
-            background-color: rgba(255, 255, 255, 0.02);
-            cursor: pointer;
-        }
-
-        .file-drop-area:hover, .file-drop-area.dragover {
-            border-color: var(--accent-color);
-            background-color: rgba(56, 189, 248, 0.08);
-        }
-
-        .file-msg {
-            font-size: 1.2em;
-            color: #cbd5e1;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .file-msg-sub {
-            font-size: 0.9em;
-            color: #64748b;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        .submit-btn {
-            background-color: var(--accent-color);
-            color: #0f172a;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2em;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .submit-btn:hover {
-            background-color: var(--accent-hover);
-            color: white;
-            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
-        }
+        .cyber-btn:hover:not(:disabled) { background: #39ff14; color: #0d1117; box-shadow: 0 0 15px #39ff14; }
+        .cyber-btn:disabled { border-color: #444; color: #888; cursor: not-allowed; box-shadow: none; background: #222; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Image Intel</h1>
-        <p>מערכת סריקה וניתוח נתוני EXIF</p>
-
-        <form action="/analyze" method="POST" enctype="multipart/form-data">
-            <div class="file-drop-area" id="drop-area">
-                <span class="file-msg" id="file-msg">לחץ כאן או גרור תמונות לכאן</span>
-                <span class="file-msg-sub" id="file-msg-sub">אפשר לבחור כמה תמונות יחד</span>
-                <input type="file" name="photos" id="file-input" multiple accept="image/*">
+    <div class="cyber-card">
+        <h1><i class="fas fa-radar"></i> סורק מודיעין תמונות</h1>
+        <p style="color: #8b949e; margin-bottom: 30px;">הכנס נתיב תיקייה מקומית לתחילת סריקה פורנזית</p>
+        
+        <form action="/analyze" method="POST" id="scanForm">
+            <div class="input-group">
+                <i class="fas fa-folder-open"></i>
+                <input type="text" name="folder_input_name" placeholder="הכנס נתיב לתיקיית תמונות, לדוגמה: C:/images" required>
             </div>
-
-            <button type="submit" class="submit-btn">התחל ניתוח מודיעיני</button>
+            <button type="submit" class="cyber-btn" id="submitBtn">
+                <i class="fas fa-search"></i> עבד נתונים
+            </button>
         </form>
     </div>
 
     <script>
-    const dropArea = document.getElementById('drop-area');
-    const fileInput = document.getElementById('file-input');
-    const fileMsg = document.getElementById('file-msg');
-    const fileMsgSub = document.getElementById('file-msg-sub');
-
-    const filesMap = new Map();
-
-    dropArea.addEventListener('click', () => fileInput.click());
-
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, preventDefaults, false);
-    });
-
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false);
-    });
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false);
-    });
-
-    function addFilesToList(newFiles) {
-        for (let i = 0; i < newFiles.length; i++) {
-            const file = newFiles[i];
-            filesMap.set(file.name, file);
-        }
-
-        const dt = new DataTransfer();
-        filesMap.forEach((file) => {
-            dt.items.add(file);
+        document.getElementById('scanForm').addEventListener('submit', function() {
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> מנתח נתונים, נא להמתין...';
+            // השהייה קלה כדי לאפשר לטופס להישלח לפני שהכפתור מנוטרל
+            setTimeout(() => { btn.disabled = true; }, 10);
         });
-
-        fileInput.files = dt.files;
-        updateFileName();
-    }
-
-    dropArea.addEventListener('drop', (e) => {
-        addFilesToList(e.dataTransfer.files);
-    });
-
-    fileInput.addEventListener('change', (e) => {
-        const selectedFiles = e.target.files;
-        if (selectedFiles.length > 0) {
-            addFilesToList(selectedFiles);
-        }
-    });
-
-    function updateFileName() {
-        const totalFiles = fileInput.files.length;
-        if (totalFiles > 0) {
-            fileMsg.textContent = "נצברו " + totalFiles + " תמונות";
-            fileMsg.style.color = "var(--accent-color)";
-            fileMsgSub.textContent = "אפשר להמשיך להוסיף, תמונות זהות הוחלפו אוטומטית";
-        } else {
-            fileMsg.textContent = "לחץ כאן או גרור תמונות לכאן";
-            fileMsg.style.color = "#cbd5e1";
-            fileMsgSub.textContent = "אפשר לבחור כמה תמונות יחד";
-        }
-    }
     </script>
 </body>
 </html>

@@ -186,7 +186,7 @@ def generate_camera_dashboard(target_folder):
 # ==========================================
 if __name__ == "__main__":
     # שנה כאן לנתיב התיקייה שבה נמצאות התמונות שלך
-    MY_PHOTOS_PATH = r"C:/Intel/pycharm/pythonProject12/images"
+    MY_PHOTOS_PATH = r"C:\Users\bnf05\PycharmProjects\end_project\image_intel_shahaf\images"
 
     # מפעילים את המכונה!
     generate_camera_dashboard(MY_PHOTOS_PATH)

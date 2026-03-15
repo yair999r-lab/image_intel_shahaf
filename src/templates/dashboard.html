@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דשבורד מודיעין מרכזי</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
+        .header { text-align: center; border-bottom: 1px solid #30363d; padding-bottom: 20px; margin-bottom: 20px; }
+        h1 { color: #39ff14; margin: 0; }
+        
+        /* עיצוב הלשוניות */
+        .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .tab-btn {
+            background: #161b22; border: 1px solid #30363d; color: #8b949e; padding: 12px 25px; 
+            border-radius: 8px; cursor: pointer; font-size: 16px; transition: 0.3s;
+        }
+        .tab-btn:hover:not(:disabled) { background: #21262d; color: #c9d1d9; }
+        .tab-btn.active { background: rgba(57, 255, 20, 0.1); border-color: #39ff14; color: #39ff14; box-shadow: 0 0 10px rgba(57, 255, 20, 0.2); }
+        .tab-btn:disabled { opacity: 0.5; cursor: not-allowed; text-decoration: line-through; }
+        
+        /* תוכן הלשוניות */
+        .tab-content { display: none; background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; min-height: 400px; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* כרטיסיות סיכום */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .stat-box { background: #0d1117; border: 1px solid #58a6ff; border-radius: 8px; padding: 20px; text-align: center; border-right: 4px solid #58a6ff; }
+        .stat-box i { font-size: 2em; color: #58a6ff; margin-bottom: 10px; }
+        .stat-value { font-size: 2em; font-weight: bold; color: #c9d1d9; display: block; }
+        .stat-label { color: #8b949e; }
+        
+        .action-bar { margin-top: 20px; text-align: center; }
+        .cyber-btn { background: transparent; border: 1px solid #39ff14; color: #39ff14; padding: 10px 20px; text-decoration: none; border-radius: 5px; transition: 0.3s; }
+        .cyber-btn:hover { background: #39ff14; color: #000; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-network-wired"></i> דשבורד חקירה פורנזית</h1>
+    </div>
+
+    <div class="tab-container">
+        <button class="tab-btn active" onclick="openTab(event, 'summary')"><i class="fas fa-chart-pie"></i> סיכום נתונים</button>
+        <button class="tab-btn" onclick="openTab(event, 'map')" {% if not map_available %}disabled{% endif %}><i class="fas fa-map-marked-alt"></i> מפת צילומים</button>
+        <button class="tab-btn" onclick="openTab(event, 'timeline')" {% if not timeline_available %}disabled{% endif %}><i class="fas fa-project-diagram"></i> ציר זמן</button>
+    </div>
+
+    <div id="summary" class="tab-content active">
+        <div class="stats-grid">
+            <div class="stat-box">
+                <i class="fas fa-images"></i>
+                <span class="stat-value">{{ analysis_results.total_images }}</span>
+                <span class="stat-label">סה"כ תמונות שנסרקו</span>
+            </div>
+            <div class="stat-box">
+                <i class="fas fa-map-marker-alt"></i>
+                <span class="stat-value">{{ analysis_results.images_with_gps }}</span>
+                <span class="stat-label">תמונות עם מיקום (GPS)</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="map" class="tab-content">
+        {{ map_html | safe }}
+    </div>
+
+    <div id="timeline" class="tab-content">
+        {{ timeline_html | safe }}
+    </div>
+
+    <div class="action-bar">
+        <a href="/" class="cyber-btn"><i class="fas fa-home"></i> חזרה לחיפוש חדש</a>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            // הסתרת כל התכנים
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            // הסרת מחלקת active מכל הכפתורים
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            // הצגת התוכן הנבחר והדגשת הכפתור
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+</body>
+</html>
