@@ -137,7 +137,7 @@ def create_map(images_data):
     # 8. החזרת התוצאה:
     # חוזה הממשקים (API Contract) מחייב להחזיר מחרוזת HTML טהורה ולא לשמור קובץ,
     # כדי שהאפליקציה של הצוות המקביל תוכל להציג את זה ברשת בצורה חלקה.
-    return True,m.get_root().render()
+    return True,m.get_root()._repr_html_()
 
 
 if __name__ == "__main__":
