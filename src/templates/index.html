@@ -18,11 +18,33 @@
         h1 { color: #39ff14; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; }
         .input-group { position: relative; margin-bottom: 25px; }
         .input-group i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #8b949e; }
-        input[type="text"] {
+
+        /* עיצוב שדה העלאת הקבצים */
+        input[type="file"] {
             width: 100%; padding: 15px 45px 15px 15px; background: #010409; border: 1px solid #30363d;
             border-radius: 8px; color: #58a6ff; font-size: 16px; box-sizing: border-box; transition: 0.3s;
+            cursor: pointer;
         }
-        input[type="text"]:focus { border-color: #39ff14; outline: none; box-shadow: 0 0 10px rgba(57, 255, 20, 0.3); }
+        input[type="file"]:focus { border-color: #39ff14; outline: none; box-shadow: 0 0 10px rgba(57, 255, 20, 0.3); }
+
+        /* עיצוב הכפתור הפנימי הלבן של בחירת הקבצים */
+        input[type="file"]::file-selector-button {
+            background-color: #0d1117;
+            color: #39ff14;
+            border: 1px solid #39ff14;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 15px; /* מרווח ימינה בגלל ה-RTL */
+            font-family: inherit;
+            transition: 0.3s;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background-color: #39ff14;
+            color: #0d1117;
+        }
+
         .cyber-btn {
             background: transparent; border: 2px solid #39ff14; color: #39ff14; padding: 15px 30px;
             font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; width: 100%;
@@ -34,12 +56,12 @@
 <body>
     <div class="cyber-card">
         <h1><i class="fas fa-radar"></i> סורק מודיעין תמונות</h1>
-        <p style="color: #8b949e; margin-bottom: 30px;">הכנס נתיב תיקייה מקומית לתחילת סריקה פורנזית</p>
-        
-        <form action="/analyze" method="POST" id="scanForm">
+        <p style="color: #8b949e; margin-bottom: 30px;">בחר תיקיית תמונות מהמחשב לתחילת סריקה פורנזית</p>
+
+        <form action="/analyze" method="POST" id="scanForm" enctype="multipart/form-data">
             <div class="input-group">
                 <i class="fas fa-folder-open"></i>
-                <input type="text" name="folder_input_name" placeholder="הכנס נתיב לתיקיית תמונות, לדוגמה: C:/images" required>
+                <input type="file" name="files" webkitdirectory directory multiple required>
             </div>
             <button type="submit" class="cyber-btn" id="submitBtn">
                 <i class="fas fa-search"></i> עבד נתונים
@@ -51,7 +73,6 @@
         document.getElementById('scanForm').addEventListener('submit', function() {
             const btn = document.getElementById('submitBtn');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> מנתח נתונים, נא להמתין...';
-            // השהייה קלה כדי לאפשר לטופס להישלח לפני שהכפתור מנוטרל
             setTimeout(() => { btn.disabled = true; }, 10);
         });
     </script>
