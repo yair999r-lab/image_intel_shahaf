@@ -36,11 +36,22 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* כרטיסיות סיכום ראשיות */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-box { background: #06142e; border: 1px solid #58a6ff; border-radius: 8px; padding: 20px; text-align: center; border-right: 4px solid #58a6ff; }
         .stat-box i { font-size: 2em; color: #58a6ff; margin-bottom: 10px; }
         .stat-value { font-size: 2em; font-weight: bold; color: #c9d1d9; display: block; }
         .stat-label { color: #8b949e; }
+
+        /* --- תוספת: עיצוב כפתורי הסינון החדשים --- */
+        .filters-section { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #1a365d; }
+        .filter-group { margin-bottom: 15px; }
+        .filter-group:last-child { margin-bottom: 0; }
+        .filter-title { color: #8b949e; font-size: 0.9em; margin-bottom: 8px; font-weight: bold; }
+        .filter-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+        .filter-tag { background: #161b22; border: 1px solid #30363d; color: #c9d1d9; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.9em; transition: 0.3s; }
+        .filter-tag:hover { border-color: #58a6ff; }
+        .filter-tag.active { background: #58a6ff; color: #000; border-color: #58a6ff; font-weight: bold; }
+        .filter-tag.disabled { opacity: 0.3; pointer-events: none; }
 
         .action-bar { margin-top: 20px; text-align: center; }
         .cyber-btn { background: transparent; border: 1px solid #39ff14; color: #39ff14; padding: 10px 20px; text-decoration: none; border-radius: 5px; transition: 0.3s; cursor: pointer; font-family: inherit; font-size: 16px; }
@@ -119,94 +130,97 @@
                 <span class="stat-value">{{ analysis_results.images_with_gps }}</span>
                 <span class="stat-label">תמונות עם מיקום (GPS)</span>
             </div>
+            <div class="stat-box">
+                <i class="fas fa-city"></i>
+                <span class="stat-value">{{ analysis_results.total_unique_cities }}</span>
+                <span class="stat-label">ערים ייחודיות</span>
+            </div>
         </div>
 
+        <div class="filters-section">
+            <div class="filter-group">
+                <div class="filter-title"><i class="fas fa-map-pin"></i> סינון לפי עיר:</div>
+                <div class="filter-buttons" id="city-filters">
+                    <button class="filter-tag active" data-type="city" data-value="all">כל הערים</button>
+                    {% for city, count in analysis_results.cities_distribution.items() %}
+                        <button class="filter-tag" data-type="city" data-value="{{ city }}">{{ city }} ({{ count }})</button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <div class="filter-title"><i class="fas fa-mobile-alt"></i> סינון לפי מכשיר:</div>
+                <div class="filter-buttons" id="device-filters">
+                    <button class="filter-tag active" data-type="device" data-value="all">כל המכשירים</button>
+                    {% for camera in analysis_results.unique_cameras %}
+                        <button class="filter-tag" data-type="device" data-value="{{ camera }}">{{ camera }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
         <div class="insights-section">
             <h2 class="insights-main-title">
                 <i class="fas fa-brain"></i> אזהרות ותובנות מערכת
             </h2>
 
-            <div class="insights-container">
+            <div class="insights-container" id="insights-container">
                 {% if analysis_results.insights %}
 
                     {% set ns = namespace(devices=[], gaps=[], times=[], others=[]) %}
 
                     {% for insight in analysis_results.insights %}
-                        {% set parts = insight.split(':', 1) %}
-                        {% set clean_msg = parts[1] if parts|length > 1 else insight %}
-
-                        {% if 'החלפת מכשיר' in insight %}
-                            {% set ns.devices = ns.devices + [clean_msg] %}
-                        {% elif 'פער' in insight %}
-                            {% set ns.gaps = ns.gaps + [clean_msg] %}
-                        {% elif 'זמן' in insight %}
-                            {% set ns.times = ns.times + [clean_msg] %}
+                        {% if insight.type in ['device_switch', 'multiple_devices'] %}
+                            {% set ns.devices = ns.devices + [insight] %}
+                        {% elif insight.type == 'time_gap' %}
+                            {% set ns.gaps = ns.gaps + [insight] %}
+                        {% elif insight.type == 'usage_time' %}
+                            {% set ns.times = ns.times + [insight] %}
                         {% else %}
-                            {% set ns.others = ns.others + [clean_msg] %}
+                            {% set ns.others = ns.others + [insight] %}
                         {% endif %}
                     {% endfor %}
 
+                    {% macro render_insight(insight, title) %}
+                        {% set parts = insight.text.split(':', 1) %}
+                        {% set clean_msg = parts[1] if parts|length > 1 else insight.text %}
+                        {% set cities_str = insight.cities | join(',') %}
+                        {% set devices_str = insight.devices | join(',') %}
+
+                        <details class="insight-card js-insight-card" data-cities="{{ cities_str }}" data-devices="{{ devices_str }}">
+                            <summary class="insight-summary">
+                                <i class="fas fa-exclamation-triangle warning-icon"></i>
+                                <span>{{ title }}</span>
+                                <i class="fas fa-chevron-down toggle-icon"></i>
+                            </summary>
+                            <div class="insight-body">{{ clean_msg }}</div>
+                        </details>
+                    {% endmacro %}
+
                     {% if ns.devices %}
-                        <div class="category-header"><i class="fas fa-mobile-alt"></i> החלפות ציוד ומכשירים</div>
-                        <div class="category-grid">
-                            {% for msg in ns.devices %}
-                                <details class="insight-card">
-                                    <summary class="insight-summary">
-                                        <i class="fas fa-exclamation-triangle warning-icon"></i>
-                                        <span>אזהרת ציוד חשודה</span>
-                                        <i class="fas fa-chevron-down toggle-icon"></i>
-                                    </summary>
-                                    <div class="insight-body">{{ msg }}</div>
-                                </details>
-                            {% endfor %}
+                        <div class="category-header js-category"><i class="fas fa-mobile-alt"></i> החלפות ציוד ומכשירים</div>
+                        <div class="category-grid js-category-grid">
+                            {% for insight in ns.devices %} {{ render_insight(insight, "אזהרת ציוד חשודה") }} {% endfor %}
                         </div>
                     {% endif %}
 
                     {% if ns.gaps %}
-                        <div class="category-header"><i class="fas fa-calendar-times"></i> פערי זמן וניתוקים</div>
-                        <div class="category-grid">
-                            {% for msg in ns.gaps %}
-                                <details class="insight-card">
-                                    <summary class="insight-summary">
-                                        <i class="fas fa-exclamation-triangle warning-icon"></i>
-                                        <span>אנומליית פער זמנים</span>
-                                        <i class="fas fa-chevron-down toggle-icon"></i>
-                                    </summary>
-                                    <div class="insight-body">{{ msg }}</div>
-                                </details>
-                            {% endfor %}
+                        <div class="category-header js-category"><i class="fas fa-calendar-times"></i> פערי זמן וניתוקים</div>
+                        <div class="category-grid js-category-grid">
+                            {% for insight in ns.gaps %} {{ render_insight(insight, "אנומליית פער זמנים") }} {% endfor %}
                         </div>
                     {% endif %}
 
                     {% if ns.times %}
-                        <div class="category-header"><i class="fas fa-clock"></i> היסטוריית שימוש במצלמות</div>
-                        <div class="category-grid">
-                            {% for msg in ns.times %}
-                                <details class="insight-card">
-                                    <summary class="insight-summary">
-                                        <i class="fas fa-exclamation-triangle warning-icon"></i>
-                                        <span>טווח הפעלה</span>
-                                        <i class="fas fa-chevron-down toggle-icon"></i>
-                                    </summary>
-                                    <div class="insight-body">{{ msg }}</div>
-                                </details>
-                            {% endfor %}
+                        <div class="category-header js-category"><i class="fas fa-clock"></i> היסטוריית שימוש במצלמות</div>
+                        <div class="category-grid js-category-grid">
+                            {% for insight in ns.times %} {{ render_insight(insight, "טווח הפעלה") }} {% endfor %}
                         </div>
                     {% endif %}
 
                     {% if ns.others %}
-                        <div class="category-header"><i class="fas fa-search-plus"></i> תובנות נוספות</div>
-                        <div class="category-grid">
-                            {% for msg in ns.others %}
-                                <details class="insight-card">
-                                    <summary class="insight-summary">
-                                        <i class="fas fa-exclamation-triangle warning-icon"></i>
-                                        <span>התראת מערכת כללית</span>
-                                        <i class="fas fa-chevron-down toggle-icon"></i>
-                                    </summary>
-                                    <div class="insight-body">{{ msg }}</div>
-                                </details>
-                            {% endfor %}
+                        <div class="category-header js-category"><i class="fas fa-search-plus"></i> תובנות נוספות</div>
+                        <div class="category-grid js-category-grid">
+                            {% for insight in ns.others %} {{ render_insight(insight, "התראת מערכת כללית") }} {% endfor %}
                         </div>
                     {% endif %}
 
@@ -256,6 +270,74 @@
                 document.getElementById('btn-summary').classList.add("active");
             }
         }
+
+        // --- תוספת: מנוע הסינון של הג'אווהסקריפט ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const filterBtns = document.querySelectorAll('.filter-tag');
+            const insightCards = document.querySelectorAll('.js-insight-card');
+            const categories = document.querySelectorAll('.js-category');
+            const categoryGrids = document.querySelectorAll('.js-category-grid');
+
+            let activeFilters = { city: 'all', device: 'all' };
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const type = e.target.dataset.type;
+                    const value = e.target.dataset.value;
+
+                    document.querySelectorAll(`.filter-tag[data-type="${type}"]`).forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    activeFilters[type] = value;
+                    applyFilters();
+                });
+            });
+
+            function applyFilters() {
+                let visibleCities = new Set();
+                let visibleDevices = new Set();
+
+                insightCards.forEach(card => {
+                    const cardCities = card.dataset.cities ? card.dataset.cities.split(',') : [];
+                    const cardDevices = card.dataset.devices ? card.dataset.devices.split(',') : [];
+
+                    const matchCity = (activeFilters.city === 'all' || cardCities.includes(activeFilters.city));
+                    const matchDevice = (activeFilters.device === 'all' || cardDevices.includes(activeFilters.device));
+
+                    if (matchCity && matchDevice) {
+                        card.style.display = 'block';
+                        cardCities.forEach(c => visibleCities.add(c));
+                        cardDevices.forEach(d => visibleDevices.add(d));
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                document.querySelectorAll('.filter-tag[data-type="device"]').forEach(btn => {
+                    const val = btn.dataset.value;
+                    if (val === 'all' || activeFilters.city === 'all' || visibleDevices.has(val)) {
+                        btn.classList.remove('disabled');
+                    } else {
+                        btn.classList.add('disabled');
+                    }
+                });
+
+                document.querySelectorAll('.filter-tag[data-type="city"]').forEach(btn => {
+                    const val = btn.dataset.value;
+                    if (val === 'all' || activeFilters.device === 'all' || visibleCities.has(val)) {
+                        btn.classList.remove('disabled');
+                    } else {
+                        btn.classList.add('disabled');
+                    }
+                });
+
+                categoryGrids.forEach((grid, index) => {
+                    const hasVisibleCards = Array.from(grid.children).some(card => card.style.display !== 'none');
+                    grid.style.display = hasVisibleCards ? 'grid' : 'none';
+                    if(categories[index]) categories[index].style.display = hasVisibleCards ? 'flex' : 'none';
+                });
+            }
+        });
     </script>
 </body>
 </html>

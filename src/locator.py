@@ -25,14 +25,16 @@ def get_city_and_district(lat, lon):
         time.sleep(1)
 
         # התוספת שלנו! הוספנו language='he' כדי לקבל תוצאות בעברית
-        location = geolocator.reverse((lat, lon), exactly_one=True, language='he')
+        location = geolocator.reverse((lat, lon), exactly_one=True, language='he', zoom=10)
 
         if location and location.raw.get('address'):
             address = location.raw['address']
 
             # אם אין עיר, זה פשוט יחזיר None ולא מחרוזת
-            city = address.get('city') or address.get('town') or address.get('village')
-            district = address.get('state_district') or address.get('state')
+
+            district = address.get('state_district') or address.get('state') or "מחוז לא ידוע"
+            city = address.get('city') or address.get('town') or address.get('village') or address.get(
+                'county') or f"שטח פתוח ({district})"
 
             bbox = location.raw.get('boundingbox')
 

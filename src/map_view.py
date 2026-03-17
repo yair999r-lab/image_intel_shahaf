@@ -14,6 +14,7 @@ map_view.py - יצירת מפה אינטראקטיבית
 """
 from extractor import *
 import folium
+from folium.plugins import MarkerCluster
 
 def sort_by_time(arr):
     """
@@ -43,7 +44,7 @@ def create_map(images_data):
     # שומרים אך ורק תמונות שיש להן 'has_gps' וגם ערכים תקינים של קווי רוחב ואורך.
     gps_images = [
         img for img in images_data
-        if img.get("has_gps") and img.get("latitude") and img.get("longitude")
+        if img.get("latitude") and img.get("longitude")
     ]
 
     # הגנה מפני קריסה (Edge Case):
@@ -64,7 +65,10 @@ def create_map(images_data):
     avg_lon = sum(img["longitude"] for img in gps_images) / len(gps_images)
 
     # מאתחלים את אובייקט המפה של Folium עם מרכז המפה שחישבנו וזום התחלתי נוח.
-    m = folium.Map(location=[avg_lat, avg_lon], zoom_start=13)
+    m = folium.Map(location=[avg_lat, avg_lon], zoom_start=9)
+
+    # *** התוספת שלנו: יוצרים אובייקט "אשכולות" ומוסיפים למפה ***
+    marker_cluster = MarkerCluster().add_to(m)
 
     # 4. מנגנון חלוקת צבעים חכמה למכשירים:
     # הכנו מראש רשימה של צבעים ש-Folium תומכת בהם.
@@ -115,7 +119,7 @@ def create_map(images_data):
             popup=folium.Popup(popup_content, max_width=250),
             tooltip=img.get("filename", "View"),
             icon=folium.Icon(color=color, icon="camera", prefix="fa")
-        ).add_to(m)
+        ).add_to(marker_cluster)
 
     # 7. יצירת מקרא מכשירים צף (Legend):
     # זו תיבת HTML שתמוקם באופן קבוע בפינה השמאלית התחתונה ותסביר את חלוקת הצבעים.
