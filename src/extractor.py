@@ -11,7 +11,14 @@ extractor.py - שליפת EXIF מתמונות
 ראו docs/api_contract.md לפורמט המדויק של הפלט.
 
 """
-
+# === התוספת הקריטית לאייפונים! ===
+# אנחנו מנסים לטעון את התוסף שמאפשר קריאת קבצי HEIC
+try:
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+except ImportError:
+    print("Warning: pillow-heif is not installed. iPhone HEIC images will fail.")
+# ================================
 
 def has_gps(data: dict):
     return 'GPSInfo' in data
@@ -159,7 +166,7 @@ def extract_all(folder_path):
 
     # שימוש ב-rglob('*') כדי לסרוק גם תתי-תיקיות בצורה ריקורסיבית
     for file_path in dir_path.rglob('*'):
-        if file_path.is_file() and file_path.suffix.lower() in ['.jpg', '.jpeg', '.png', '.tiff']:
+        if file_path.is_file() and file_path.suffix.lower() in ['.jpg', '.jpeg', '.png', '.tiff', '.heic', '.heif']:
             metadata = extract_metadata(str(file_path))
             results.append(metadata)
 
