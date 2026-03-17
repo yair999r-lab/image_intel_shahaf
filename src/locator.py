@@ -24,21 +24,22 @@ def get_city_and_district(lat, lon):
     try:
         time.sleep(1)
 
-        # התוספת שלנו! הוספנו language='he' כדי לקבל תוצאות בעברית
-        location = geolocator.reverse((lat, lon), exactly_one=True, language='he', zoom=10)
+        # התוספות שלנו: zoom=14 לדיוק מוניציפלי, ו-timeout=10 כדי שהשרת האיטי לא יוותר!
+        location = geolocator.reverse((lat, lon), exactly_one=True, language='he', zoom=14, timeout=10)
 
         if location and location.raw.get('address'):
             address = location.raw['address']
 
-            # אם אין עיר, זה פשוט יחזיר None ולא מחרוזת
-
+            # שליפת מחוז
             district = address.get('state_district') or address.get('state') or "מחוז לא ידוע"
+
+            # שליפת עיר, עיירה, מועצה, או שטח פתוח כגיבוי אחרון
             city = address.get('city') or address.get('town') or address.get('village') or address.get(
                 'county') or f"שטח פתוח ({district})"
 
             bbox = location.raw.get('boundingbox')
 
-            # שומרים בזיכרון רק אם באמת מצאנו שם של עיר
+            # שומרים בזיכרון רק אם באמת מצאנו שם של עיר וגבולות
             if city and bbox:
                 cities_cache[city] = {
                     "bbox": bbox,
