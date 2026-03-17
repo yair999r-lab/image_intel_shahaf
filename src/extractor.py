@@ -2,6 +2,7 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 from pathlib import Path
 import os
+from locator import get_city_and_district  # *** תוספת: ייבוא המנוע הגיאוגרפי החדש שלנו ***
 
 """
 extractor.py - שליפת EXIF מתמונות
@@ -91,7 +92,7 @@ def extract_metadata(image_path):
 
     Returns:
         dict עם: filename, datetime, latitude, longitude,
-              camera_make, camera_model, has_gps
+              city, district, camera_make, camera_model, has_gps
     """
     path = Path(image_path)
 
@@ -108,6 +109,8 @@ def extract_metadata(image_path):
             "datetime": None,
             "latitude": None,
             "longitude": None,
+            "city": None,          # *** תוספת: מקרה קצה לתמונה בלי נתונים ***
+            "district": None,      # *** תוספת: מקרה קצה לתמונה בלי נתונים ***
             "camera_make": None,
             "camera_model": None,
             "has_gps": False
@@ -118,13 +121,18 @@ def extract_metadata(image_path):
         tag = TAGS.get(tag_id, tag_id)
         data[tag] = value
 
-    # תיקון: הוסר print(data) שהיה כאן - הדפיס את כל ה-EXIF הגולמי על כל תמונה
+    # *** תוספת: חילוץ נתוני ה-GPS למשתנים, ושליחתם למנוע הגיאוגרפי לקבלת עיר ומחוז ***
+    lat = latitude(data)
+    lon = longitude(data)
+    city, district = get_city_and_district(lat, lon)
 
     exif_dict = {
         "filename": path.name,
         "datetime": datatime(data),
-        "latitude": latitude(data),
-        "longitude": longitude(data),
+        "latitude": lat,
+        "longitude": lon,
+        "city": city,              # *** תוספת: הכנסת העיר למילון הסופי ***
+        "district": district,      # *** תוספת: הכנסת המחוז למילון הסופי ***
         "camera_make": camera_make(data),
         "camera_model": camera_model(data),
         "has_gps": has_gps(data)
@@ -149,6 +157,7 @@ def extract_all(folder_path):
         print(f"Error: {folder_path} is not a valid directory.")
         return results
 
+    # שימוש ב-rglob('*') כדי לסרוק גם תתי-תיקיות בצורה ריקורסיבית
     for file_path in dir_path.rglob('*'):
         if file_path.is_file() and file_path.suffix.lower() in ['.jpg', '.jpeg', '.png', '.tiff']:
             metadata = extract_metadata(str(file_path))
