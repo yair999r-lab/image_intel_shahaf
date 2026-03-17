@@ -98,8 +98,8 @@ def extract_metadata(image_path):
 
     # תיקון: טיפול בתמונה בלי EXIF - בלי זה, exif.items() נופל עם AttributeError
     try:
-        img = Image.open(image_path)
-        exif = img._getexif()
+        with Image.open(image_path) as img:
+            exif = img._getexif()
     except Exception:
         exif = None
 
