@@ -106,7 +106,7 @@ def analyze(images_data):
     total_images = len(images_data)
 
     # סופרים כמה תמונות מכילות GPS (כלומר, המפתח 'has_gps' הוא True)
-    images_with_gps = sum(1 for img in images_data if img.get("has_gps"))
+    images_with_gps = sum(1 for img in images_data if img.get("latitude") and img.get("longitude"))
 
     # סופרים כמה תמונות מכילות תאריך (datetime קיים ולא ריק)
     images_with_datetime = sum(1 for img in images_data if img.get("datetime"))
