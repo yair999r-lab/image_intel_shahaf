@@ -67,12 +67,31 @@ def longitude(data: dict):
 '''
 
 def datatime(data: dict):
+    aw_date = None
+
+    # מנסים למצוא את התאריך באחד מהשדות האפשריים
     if "DateTimeOriginal" in data:
-        return data["DateTimeOriginal"]
+        raw_date = data["DateTimeOriginal"]
     elif "DateTimeDigitized" in data:
-        return data["DateTimeDigitized"]
+        raw_date = data["DateTimeDigitized"]
     elif "DateTime" in data:
-        return data["DateTime"]
+        raw_date = data["DateTime"]
+
+    if raw_date:
+        # הופכים למחרוזת ומנקים רווחים מיותרים
+        clean_date = str(raw_date).strip()
+
+        # מתקנים תאריכים שמגיעים עם מקפים, נקודות או האות T לאותה תבנית סטנדרטית
+        # דוגמה: "2024-03-17T14-00-00" יהפוך ל- "2024:03:17 14:00:00"
+        clean_date = clean_date.replace("-", ":").replace(".", ":").replace("T", " ")
+
+        # יש מצלמות ששומרות "2024:03:17" בלי שעה. נוסיף להן שעת אפס כדי שהקוד לא יקרוס
+        if len(clean_date) <= 10:
+            clean_date += " 00:00:00"
+
+        return clean_date
+
+    return None
 '''
 הוספת פונקציה לשליפת זמן יצירת התמונה
 '''
