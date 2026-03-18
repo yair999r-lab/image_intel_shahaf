@@ -35,7 +35,7 @@
             padding: 8px 15px;
             border-radius: 5px;
             cursor: pointer;
-            margin-left: 15px; /* מרווח ימינה בגלל ה-RTL */
+            margin-left: 15px;
             font-family: inherit;
             transition: 0.3s;
         }
@@ -51,17 +51,28 @@
         }
         .cyber-btn:hover:not(:disabled) { background: #39ff14; color: #0d1117; box-shadow: 0 0 15px #39ff14; }
         .cyber-btn:disabled { border-color: #444; color: #888; cursor: not-allowed; box-shadow: none; background: #222; }
+
+        /* תוספת: עיצוב להודעה שמופיעה רק בנייד */
+        #mobile-hint {
+            font-size: 0.9em;
+            color: #58a6ff;
+            margin-top: -15px;
+            margin-bottom: 20px;
+            display: none; /* מוסתר כברירת מחדל */
+        }
     </style>
 </head>
 <body>
     <div class="cyber-card">
         <h1><i class="fas fa-radar"></i> סורק מודיעין תמונות</h1>
-        <p style="color: #8b949e; margin-bottom: 30px;">בחר תיקיית תמונות מהמחשב לתחילת סריקה פורנזית</p>
+        <p id="main-instruction" style="color: #8b949e; margin-bottom: 30px;">בחר תיקיית תמונות מהמחשב לתחילת סריקה פורנזית</p>
+
+        <p id="mobile-hint"><i class="fas fa-mobile-alt"></i> זוהתה כניסה מנייד: ניתן לסמן מספר תמונות יחד מהגלריה.</p>
 
         <form action="/analyze" method="POST" id="scanForm" enctype="multipart/form-data">
             <div class="input-group">
-                <i class="fas fa-folder-open"></i>
-                <input type="file" name="files" webkitdirectory directory multiple required>
+                <i class="fas fa-folder-open" id="input-icon"></i>
+                <input type="file" name="files" webkitdirectory directory multiple accept="image/*,.heic,.heif" required>
             </div>
             <button type="submit" class="cyber-btn" id="submitBtn">
                 <i class="fas fa-search"></i> עבד נתונים
@@ -70,6 +81,28 @@
     </div>
 
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // בדיקה פשוטה: האם המשתמש גולש מטלפון נייד (אייפון או אנדרואיד)?
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const fileInput = document.querySelector('input[type="file"]');
+            const mobileHint = document.getElementById('mobile-hint');
+            const mainInstruction = document.getElementById('main-instruction');
+            const inputIcon = document.getElementById('input-icon');
+
+            if (isMobile) {
+                // אם זה נייד, אנחנו מסירים את דרישת ה"תיקייה" ששברה לאייפון את הקוד
+                fileInput.removeAttribute('webkitdirectory');
+                fileInput.removeAttribute('directory');
+
+                // ומשנים את הטקסט והאייקון כדי שיתאימו לנייד
+                mobileHint.style.display = 'block';
+                mainInstruction.style.display = 'none';
+                inputIcon.classList.remove('fa-folder-open');
+                inputIcon.classList.add('fa-images');
+            }
+        });
+
+        // כפתור הטעינה הרגיל
         document.getElementById('scanForm').addEventListener('submit', function() {
             const btn = document.getElementById('submitBtn');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> מנתח נתונים, נא להמתין...';
