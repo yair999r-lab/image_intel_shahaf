@@ -69,15 +69,11 @@
 
         .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px; margin-right: 15px; align-items: start; }
 
-        /* קובייה כללית */
         .insight-card { background: rgba(255, 255, 255, 0.03); border: 1px solid #1a365d; border-radius: 8px; transition: 0.3s; height: 100%; }
-
-        /* עיצוב לאזהרות (צהוב) */
         .warning-card { border-right: 4px solid #ffc107; }
         .warning-card:hover { border-color: #ffc107; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(255, 193, 7, 0.15); }
         .warning-icon { color: #ffc107; font-size: 1.2em; }
 
-        /* עיצוב למידע כללי (כחול עדין) */
         .info-card { border-right: 4px solid #58a6ff; }
         .info-card:hover { border-color: #58a6ff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(88, 166, 255, 0.15); }
         .info-icon { color: #58a6ff; font-size: 1.2em; }
@@ -88,14 +84,40 @@
         .warning-card[open] .toggle-icon { transform: rotate(180deg); color: #ffc107; }
         .info-card[open] .toggle-icon { transform: rotate(180deg); color: #58a6ff; }
 
-        /* כותרת הקובייה (שם המכשיר נקי) */
         .insight-main-title { font-size: 1.1em; display: flex; align-items: center; gap: 8px; }
-
-        /* תגית התאריך העדינה */
         .insight-date-badge { color: #8b949e; font-size: 0.85em; font-weight: normal; margin-right: 10px; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 12px; border: 1px solid #30363d; }
 
         .insight-body { padding: 15px; border-top: 1px dashed #1a365d; color: #c9d1d9; font-size: 1.05em; background: rgba(0,0,0,0.3); line-height: 1.5; border-radius: 0 0 8px 8px; }
         .insight-empty { color: #8b949e; text-align: center; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px dashed #1a365d; }
+
+        /* === הגדרות ייצוא ל-PDF (Native Print) === */
+        @media print {
+            /* 1. מסתירים את כל האתר */
+            body * {
+                visibility: hidden;
+            }
+            /* 2. מציגים רק את אזור הדו"ח והתוכן שבו */
+            #narrative-document, #narrative-document * {
+                visibility: visible;
+            }
+            /* 3. ממקמים את הדו"ח בדיוק בפינה השמאלית העליונה של דף ה-A4 */
+            #narrative-document {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white !important; /* הופך את הרקע ללבן נקי */
+                color: black !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            /* 4. מעלימים את הפס האפור שבתחתית ואת הכפתורים כדי שלא יודפסו */
+            #narrative-document hr,
+            #story .cyber-btn,
+            .action-bar {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -107,6 +129,7 @@
         <button id="btn-summary" class="tab-btn active" onclick="openTab(event, 'summary')"><i class="fas fa-chart-pie"></i> סיכום נתונים</button>
         <button class="tab-btn" onclick="openTab(event, 'map')" {% if not map_available %}disabled{% endif %}><i class="fas fa-map-marked-alt"></i> מפת צילומים</button>
         <button class="tab-btn" onclick="openTab(event, 'timeline')" {% if not timeline_available %}disabled{% endif %}><i class="fas fa-project-diagram"></i> ציר זמן</button>
+        <button class="tab-btn" onclick="openTab(event, 'story')"><i class="fas fa-file-signature"></i> דו"ח חקירה מסכם</button>
     </div>
 
     <div id="summary" class="tab-content active">
@@ -255,11 +278,82 @@
         {{ timeline_html | safe }}
     </div>
 
+    <div id="story" class="tab-content">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+            <button onclick="downloadPDF()" class="cyber-btn" style="width: auto; padding: 10px 20px; font-size: 14px;">
+                <i class="fas fa-file-pdf"></i> הדפס / שמר כ-PDF
+            </button>
+        </div>
+
+        <div id="narrative-document" style="background: #e6edf3; color: #0d1117; padding: 40px; border-radius: 8px; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.8; text-align: right; box-shadow: inset 0 0 20px rgba(0,0,0,0.1);">
+
+            <h2 style="color: #0d1117; border-bottom: 2px solid #0d1117; padding-bottom: 10px; text-align: center;">
+                <i class="fas fa-shield-alt"></i> דו"ח מודיעין פורנזי מסכם
+            </h2>
+
+            <p><strong>תקציר מנהלים:</strong><br>
+            במסגרת הסריקה הנוכחית, נותחו בהצלחה <strong>{{ analysis_results.total_images }}</strong> קבצי מדיה.
+            מתוכם, ל-<strong>{{ analysis_results.images_with_gps }}</strong> קבצים מצאנו נתוני מיקום מדויקים (GPS), ול-<strong>{{ analysis_results.images_with_datetime }}</strong> קבצים נמצאה חותמת זמן תקנית.
+            {% if analysis_results.date_range.start %}
+            חלון הזמן של החקירה מתפרס החל מ-<strong>{{ analysis_results.date_range.start }}</strong> ועד ל-<strong>{{ analysis_results.date_range.end }}</strong>.
+            {% endif %}
+            </p>
+
+            <p><strong>פרופיל תנועה ומרחב גיאוגרפי:</strong><br>
+            היעד פעל במספר מוקדים, כאשר המערכת זיהתה נוכחות ב-<strong>{{ analysis_results.total_unique_cities }}</strong> ערים ויישובים שונים.
+            {% if analysis_results.hottest_cities %}
+            אזורי הפעילות המרכזיים ביותר ("אזורים חמים") שבהם תועדה רוב הפעילות הם: <strong>{{ analysis_results.hottest_cities | join(', ') }}</strong>.
+            {% endif %}
+            </p>
+
+            <p><strong>אמצעי צילום ותקשורת:</strong><br>
+            התיעוד חושף שימוש ב-<strong>{{ analysis_results.total_unique_cameras }}</strong> מכשירים שונים במהלך התקופה.
+            המכשיר הדומיננטי ביותר שזוהה בזירה הוא <strong>
+            {% set top_device = analysis_results.devices_distribution.items()|sort(attribute=1, reverse=True)|first %}
+            {{ top_device[0] if top_device else 'לא ידוע' }}
+            </strong>.
+            </p>
+
+            {% if analysis_results.insights %}
+            <p style="color: #b00020;"><strong><i class="fas fa-exclamation-circle"></i> אינדיקציות ופעילות חריגה:</strong><br>
+            המערכת האנליטית שלנו זיהתה <strong>{{ analysis_results.insights | length }}</strong> אירועים הדורשים תשומת לב חקירתית:
+            <ul style="color: #b00020;">
+                {% for insight in analysis_results.insights %}
+                    {% if insight.type == 'device_switch' %}
+                    <li><strong>החלפת ציוד:</strong> תועד מעבר פתאומי בין מכשירים ({{ insight.devices | join(' ל- ') }}) בתאריך {{ insight.date }}. הדבר עשוי להעיד על ניסיון הסוואת עקבות או החלפת מכשיר מבצעי.</li>
+                    {% elif insight.type == 'time_gap' %}
+                    <li><strong>נתק מבצעי:</strong> זוהה פער זמנים חריג של מעל 12 שעות ללא תיעוד, אשר הסתיים בתאריך {{ insight.date }} במכשיר {{ insight.devices[0] }}.</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            </p>
+            {% else %}
+            <p style="color: #1a7f37;"><strong><i class="fas fa-check-circle"></i> אינדיקציות:</strong> לא זוהו קפיצות זמן חריגות או החלפות ציוד חשודות המעידות על שינוי דפוס פעולה.</p>
+            {% endif %}
+
+            <div style="margin-top: 50px; text-align: left; font-size: 0.9em; color: #57606a;">
+                <hr style="border: 0; border-top: 1px solid #d0d7de; margin-bottom: 10px;">
+                הופק אוטומטית על ידי מערכת סריקת תמונות סייבר<br>
+                תאריך הפקה: <span id="current-date"></span>
+            </div>
+        </div>
+    </div>
+
     <div class="action-bar">
         <a href="/" class="cyber-btn"><i class="fas fa-home"></i> חזרה לחיפוש חדש</a>
     </div>
 
     <script>
+        // פונקציה שמזריקה את התאריך של היום לתוך הדו"ח
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('current-date').innerText = new Date().toLocaleDateString('he-IL');
+        });
+
+        // הפעלת מנוע ה-PDF המובנה של הדפדפן להדפסה מושלמת בעברית
+        function downloadPDF() {
+            window.print();
+        }
+
         function openTab(evt, tabName) {
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tab-content");
