@@ -64,7 +64,8 @@ def analyze_folder():
                                    timeline_html=timeline_html,
                                    map_available=map_available,
                                    map_html=map_html,
-                                   analysis_results=analysis_results)
+                                   analysis_results=analysis_results,
+                                   images_data=images_data)  # העברת נתוני התמונות ל-JS לטובת הסינון הדינמי
 
     finally:
         # 5. ניקיון אוטומטי! הבלוק הזה ירוץ תמיד, וימחק את התמונות מהשרת בסיום הניתוח

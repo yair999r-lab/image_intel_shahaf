@@ -81,6 +81,9 @@ def create_map(images_data):
     # אינדקס שיעזור לנו לרוץ על רשימת הצבעים בצורה עוקבת.
     color_index = 0
 
+    # הכנת מערך הנתונים שישמש אותנו במנגנון המיקוד מהדשבורד
+    js_map_data = "<script>\nwindow.cyberMapData = [\n"
+
     # 5. הצבת סמנים (Markers) לכל תמונה:
     for img in gps_images:
         # מנסים למשוך את יצרן ודגם המצלמה.
@@ -89,6 +92,7 @@ def create_map(images_data):
         model = img.get("camera_model", "Device")
         # מחברים את השם והדגם למחרוזת אחת נקייה.
         device_name = f"{make} {model}".strip()
+        city_name = img.get("city", "Unknown")
 
         # בדיקה: האם זה מכשיר חדש שטרם נתקלנו בו בלולאה?
         if device_name not in device_colors:
@@ -98,7 +102,7 @@ def create_map(images_data):
             # מקדמים את המונה *רק* כשמצאנו מכשיר חדש. כך כל תמונות האייפון, למשל, יקבלו אותו צבע.
             color_index += 1
 
-            # שולפים מתוך המילון את הצבע שנשמר למכשיר הספציפי הזה.
+        # שולפים מתוך המילון את הצבע שנשמר למכשיר הספציפי הזה.
         color = device_colors[device_name]
 
         # 6. בניית חלונית מידע קופצת (Popup):
@@ -120,6 +124,33 @@ def create_map(images_data):
             tooltip=img.get("filename", "View"),
             icon=folium.Icon(color=color, icon="camera", prefix="fa")
         ).add_to(marker_cluster)
+
+        # עדכון המערך ל-JS
+        search_text = f"{device_name} {city_name}".replace("'", "").lower()
+        city_safe = city_name.replace("'", "\\'")
+        dev_safe = device_name.replace("'", "\\'")
+        js_map_data += f"  {{ lat: {img['latitude']}, lon: {img['longitude']}, text: '{search_text}', city: '{city_safe}', device: '{dev_safe}' }},\n"
+
+    # סגירת המערך ופריצת מסגרת ה-iframe כדי לאפשר לדשבורד לשלוט במפה
+    js_map_data += "];\n"
+    js_map_data += """
+    document.addEventListener("DOMContentLoaded", function() {
+        setTimeout(function() {
+            for (var key in window) {
+                if (key.startsWith("map_") && window[key] instanceof L.Map) {
+                    if (window.parent) {
+                        window.parent.myCyberMap = window[key];
+                        window.parent.cyberMapData = window.cyberMapData;
+                    }
+                    window.myCyberMap = window[key];
+                    break;
+                }
+            }
+        }, 500);
+    });
+    </script>
+    """
+    m.get_root().html.add_child(folium.Element(js_map_data))
 
     # 7. יצירת מקרא מכשירים צף (Legend):
     # זו תיבת HTML שתמוקם באופן קבוע בפינה השמאלית התחתונה ותסביר את חלוקת הצבעים.

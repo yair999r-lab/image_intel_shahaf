@@ -16,20 +16,56 @@
         body {
             color: #c9d1d9;
             font-family: 'Segoe UI', sans-serif;
-            padding: 20px;
             box-sizing: border-box;
         }
 
-        .header { text-align: center; border-bottom: 1px solid #1a365d; padding-bottom: 20px; margin-bottom: 20px; }
-        h1 { color: #39ff14; margin: 0; }
+        .sticky-top-bar {
+            position: sticky; top: 0; z-index: 9999; background: rgba(6, 20, 46, 0.95);
+            backdrop-filter: blur(10px); padding: 15px 20px;
+            border-bottom: 1px solid #1a365d; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            width: 100%;
+            transition: position 0.1s;
+        }
+        .sticky-top-bar.unpinned {
+            position: relative;
+        }
+        .sticky-content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-        .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .header { text-align: center; border-bottom: 1px solid transparent; padding-bottom: 5px; margin-bottom: 15px; }
+        h1 { color: #39ff14; margin: 0; font-size: 1.8em; }
+
+        .search-container { margin: 0 auto 15px auto; position: relative; }
+        .cyber-search-input {
+            width: 100%; background: rgba(11, 31, 64, 0.8); border: 2px solid #58a6ff;
+            border-radius: 8px; padding: 12px 45px 12px 15px; color: #c9d1d9; font-size: 1.1em;
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.2); transition: 0.3s; box-sizing: border-box;
+        }
+        .cyber-search-input:focus { border-color: #39ff14; box-shadow: 0 0 15px rgba(57, 255, 20, 0.4); outline: none; }
+        .search-icon { position: absolute; right: 15px; top: 15px; color: #58a6ff; font-size: 1.1em; }
+        .search-status { text-align: center; color: #8b949e; font-size: 0.95em; height: 20px; margin-bottom: 15px; }
+        .highlight-glow { background-color: #ffc107; color: #000; border-radius: 3px; box-shadow: 0 0 8px rgba(255, 193, 7, 0.8); padding: 0 3px; font-weight: bold; transition: 0.3s; }
+        .filter-tag.active:not([data-value="all"])::after { content: '\00d7'; margin-right: 6px; font-weight: bold; font-size: 1.2em; line-height: 0.5; }
+
+        .filters-section { background: rgba(0,0,0,0.3); padding: 15px 25px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #1a365d; }
+        .filter-group { margin-bottom: 15px; display: flex; align-items: flex-start; gap: 20px; }
+        .filter-group:last-child { margin-bottom: 0; }
+        .filter-title { color: #8b949e; font-size: 1em; font-weight: bold; white-space: nowrap; margin-top: 5px; width: 140px; flex-shrink: 0; text-align: right; }
+        .filter-buttons { display: flex; flex-wrap: wrap; gap: 8px; flex-grow: 1; }
+        .filter-tag { background: #161b22; border: 1px solid #30363d; color: #c9d1d9; padding: 6px 15px; border-radius: 15px; cursor: pointer; font-size: 0.9em; transition: 0.3s; }
+        .filter-tag:hover { border-color: #58a6ff; }
+        .filter-tag.active { background: #58a6ff; color: #000; border-color: #58a6ff; font-weight: bold; }
+
+        .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 5px; }
         .tab-btn { background: #0b1f40; border: 1px solid #1a365d; color: #8b949e; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: 0.3s; }
         .tab-btn:hover:not(:disabled) { background: #112b55; color: #c9d1d9; }
         .tab-btn.active { background: rgba(57, 255, 20, 0.1); border-color: #39ff14; color: #39ff14; box-shadow: 0 0 10px rgba(57, 255, 20, 0.2); }
         .tab-btn:disabled { opacity: 0.5; cursor: not-allowed; text-decoration: line-through; }
 
-        .tab-content { display: none; background: #0b1f40; border: 1px solid #1a365d; border-radius: 10px; padding: 20px; min-height: 400px; position: relative; }
+        .content-area { padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .tab-content { display: none; background: #0b1f40; border: 1px solid #1a365d; border-radius: 10px; padding: 20px; min-height: 400px; position: relative; width: 100%; box-sizing: border-box; }
         .tab-content.active { display: block; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -45,20 +81,9 @@
         .stat-value { font-size: 2em; font-weight: bold; color: #c9d1d9; display: block; }
         .stat-label { color: #8b949e; }
 
-        .filters-section { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #1a365d; }
-        .filter-group { margin-bottom: 15px; }
-        .filter-group:last-child { margin-bottom: 0; }
-        .filter-title { color: #8b949e; font-size: 0.9em; margin-bottom: 8px; font-weight: bold; }
-        .filter-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
-        .filter-tag { background: #161b22; border: 1px solid #30363d; color: #c9d1d9; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.9em; transition: 0.3s; }
-        .filter-tag:hover { border-color: #58a6ff; }
-        .filter-tag.active { background: #58a6ff; color: #000; border-color: #58a6ff; font-weight: bold; }
-        .filter-tag.disabled { opacity: 0.3; pointer-events: none; }
-
         .action-bar { margin-top: 20px; text-align: center; }
-        .cyber-btn { background: transparent; border: 1px solid #39ff14; color: #39ff14; padding: 10px 20px; text-decoration: none; border-radius: 5px; transition: 0.3s; cursor: pointer; font-family: inherit; font-size: 16px; }
+        .cyber-btn { background: rgba(11, 31, 64, 0.8); border: 1px solid #39ff14; color: #39ff14; padding: 8px 16px; text-decoration: none; border-radius: 5px; transition: 0.3s; cursor: pointer; font-family: inherit; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; }
         .cyber-btn:hover { background: #39ff14; color: #000; }
-
         .close-map-btn { background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 5px; transition: 0.3s; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; }
         .close-map-btn:hover { background: #ff4444; color: #000; box-shadow: 0 0 10px #ff4444; }
 
@@ -66,14 +91,12 @@
         .insights-main-title { color: #00d4ff; border-bottom: 2px solid #00d4ff; padding-bottom: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 1.5em; }
 
         .category-header { color: #58a6ff; background: rgba(88, 166, 255, 0.1); padding: 10px 15px; border-radius: 5px; margin-top: 30px; margin-bottom: 15px; font-size: 1.2em; display: flex; align-items: center; gap: 10px; border-right: 4px solid #58a6ff; }
-
         .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px; margin-right: 15px; align-items: start; }
 
         .insight-card { background: rgba(255, 255, 255, 0.03); border: 1px solid #1a365d; border-radius: 8px; transition: 0.3s; height: 100%; }
         .warning-card { border-right: 4px solid #ffc107; }
         .warning-card:hover { border-color: #ffc107; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(255, 193, 7, 0.15); }
         .warning-icon { color: #ffc107; font-size: 1.2em; }
-
         .info-card { border-right: 4px solid #58a6ff; }
         .info-card:hover { border-color: #58a6ff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(88, 166, 255, 0.15); }
         .info-icon { color: #58a6ff; font-size: 1.2em; }
@@ -86,270 +109,301 @@
 
         .insight-main-title { font-size: 1.1em; display: flex; align-items: center; gap: 8px; }
         .insight-date-badge { color: #8b949e; font-size: 0.85em; font-weight: normal; margin-right: 10px; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 12px; border: 1px solid #30363d; }
-
         .insight-body { padding: 15px; border-top: 1px dashed #1a365d; color: #c9d1d9; font-size: 1.05em; background: rgba(0,0,0,0.3); line-height: 1.5; border-radius: 0 0 8px 8px; }
         .insight-empty { color: #8b949e; text-align: center; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px dashed #1a365d; }
 
-        /* === הגדרות ייצוא ל-PDF (Native Print) === */
         @media print {
-            /* 1. מסתירים את כל האתר */
-            body * {
-                visibility: hidden;
-            }
-            /* 2. מציגים רק את אזור הדו"ח והתוכן שבו */
-            #narrative-document, #narrative-document * {
-                visibility: visible;
-            }
-            /* 3. ממקמים את הדו"ח בדיוק בפינה השמאלית העליונה של דף ה-A4 */
-            #narrative-document {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                background: white !important; /* הופך את הרקע ללבן נקי */
-                color: black !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-            }
-            /* 4. מעלימים את הפס האפור שבתחתית ואת הכפתורים כדי שלא יודפסו */
-            #narrative-document hr,
-            #story .cyber-btn,
-            .action-bar {
-                display: none !important;
-            }
+            body * { visibility: hidden; }
+            .sticky-top-bar { position: static; display: none; }
+            #narrative-document, #narrative-document * { visibility: visible; }
+            #narrative-document { position: absolute; left: 0; top: 0; width: 100%; background: white !important; color: black !important; box-shadow: none !important; padding: 0 !important; }
+            #narrative-document hr, #story .cyber-btn, .action-bar, #story-search-tools { display: none !important; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1><i class="fas fa-network-wired"></i> דשבורד חקירה פורנזית</h1>
-    </div>
-
-    <div class="tab-container">
-        <button id="btn-summary" class="tab-btn active" onclick="openTab(event, 'summary')"><i class="fas fa-chart-pie"></i> סיכום נתונים</button>
-        <button class="tab-btn" onclick="openTab(event, 'map')" {% if not map_available %}disabled{% endif %}><i class="fas fa-map-marked-alt"></i> מפת צילומים</button>
-        <button class="tab-btn" onclick="openTab(event, 'timeline')" {% if not timeline_available %}disabled{% endif %}><i class="fas fa-project-diagram"></i> ציר זמן</button>
-        <button class="tab-btn" onclick="openTab(event, 'story')"><i class="fas fa-file-signature"></i> דו"ח חקירה מסכם</button>
-    </div>
-
-    <div id="summary" class="tab-content active">
-
-        <div class="scan-success-banner">
-            <h2><i class="fas fa-check-circle"></i> נסרקו בהצלחה {{ analysis_results.total_images }} תמונות</h2>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-box">
-                <i class="fas fa-map-marker-alt"></i>
-                <span class="stat-value">{{ analysis_results.images_with_gps }}</span>
-                <span class="stat-label">תמונות עם מיקום (GPS)</span>
+    <div class="sticky-top-bar">
+        <div class="sticky-content-wrapper">
+            <div class="header">
+                <h1><i class="fas fa-network-wired"></i> דשבורד חקירה פורנזית</h1>
             </div>
-            <div class="stat-box">
-                <i class="fas fa-calendar-alt"></i>
-                <span class="stat-value">{{ analysis_results.images_with_datetime }}</span>
-                <span class="stat-label">תמונות עם תאריך</span>
-            </div>
-            <div class="stat-box">
-                <i class="fas fa-city"></i>
-                <span class="stat-value">{{ analysis_results.total_unique_cities }}</span>
-                <span class="stat-label">ערים ייחודיות</span>
-            </div>
-            <div class="stat-box">
-                <i class="fas fa-mobile-alt"></i>
-                <span class="stat-value">{{ analysis_results.total_unique_cameras }}</span>
-                <span class="stat-label">מכשירים שונים</span>
-            </div>
-        </div>
 
-        <div class="filters-section">
-            <div class="filter-group">
-                <div class="filter-title"><i class="fas fa-map-pin"></i> סינון לפי עיר:</div>
-                <div class="filter-buttons" id="city-filters">
-                    <button class="filter-tag active" data-type="city" data-value="all">כל הערים</button>
-                    {% for city, count in analysis_results.cities_distribution.items() %}
-                        <button class="filter-tag" data-type="city" data-value="{{ city }}">{{ city }} ({{ count }})</button>
-                    {% endfor %}
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="global-search" class="cyber-search-input" placeholder="חיפוש חופשי להוספה לסינון (ירושלים, Apple, מפה...)">
+            </div>
+
+            <div class="filters-section">
+                <div class="filter-group">
+                    <div class="filter-title"><i class="fas fa-map-pin"></i> סינון לפי עיר:</div>
+                    <div class="filter-buttons" id="city-filters">
+                        <button class="filter-tag active js-filter-btn" data-type="city" data-value="all">כל הערים</button>
+                        {% for city, count in analysis_results.cities_distribution.items() %}
+                            <button class="filter-tag js-filter-btn" data-type="city" data-value="{{ city }}">{{ city }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <div class="filter-title"><i class="fas fa-mobile-alt"></i> סינון לפי מכשיר:</div>
+                    <div class="filter-buttons" id="device-filters">
+                        <button class="filter-tag active js-filter-btn" data-type="device" data-value="all">כל המכשירים</button>
+                        {% for device, count in analysis_results.devices_distribution.items() %}
+                            <button class="filter-tag js-filter-btn" data-type="device" data-value="{{ device }}">{{ device }}</button>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
 
-            <div class="filter-group">
-                <div class="filter-title"><i class="fas fa-mobile-alt"></i> סינון לפי מכשיר:</div>
-                <div class="filter-buttons" id="device-filters">
-                    <button class="filter-tag active" data-type="device" data-value="all">כל המכשירים</button>
-                    {% for device, count in analysis_results.devices_distribution.items() %}
-                        <button class="filter-tag" data-type="device" data-value="{{ device }}">{{ device }} ({{ count }})</button>
-                    {% endfor %}
+            <div class="tab-container">
+                <button id="btn-summary" class="tab-btn active" onclick="openTab(event, 'summary')"><i class="fas fa-chart-pie"></i> סיכום נתונים</button>
+                <button class="tab-btn" onclick="openTab(event, 'map')" {% if not map_available %}disabled{% endif %}><i class="fas fa-map-marked-alt"></i> מפת צילומים</button>
+                <button class="tab-btn" onclick="openTab(event, 'timeline')" {% if not timeline_available %}disabled{% endif %}><i class="fas fa-project-diagram"></i> ציר זמן</button>
+                <button class="tab-btn" onclick="openTab(event, 'story')"><i class="fas fa-file-signature"></i> דו"ח חקירה מסכם</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div id="summary" class="tab-content active">
+
+            <div id="search-status" class="search-status">המערכת מציגה נתונים גלובליים מכלל התיקייה</div>
+
+            <div class="scan-success-banner">
+                <h2><i class="fas fa-check-circle"></i> נסרקו בהצלחה <span id="banner-total">{{ analysis_results.total_images }}</span> תמונות</h2>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box" id="box-images">
+                    <i class="fas fa-images"></i>
+                    <span class="stat-value" id="stat-images">{{ analysis_results.total_images }}</span>
+                    <span class="stat-label">סך הכל תמונות</span>
+                </div>
+                <div class="stat-box" id="box-gps">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span class="stat-value" id="stat-gps">{{ analysis_results.images_with_gps }}</span>
+                    <span class="stat-label">תמונות עם מיקום (GPS)</span>
+                </div>
+                <div class="stat-box" id="box-cities">
+                    <i class="fas fa-city"></i>
+                    <span class="stat-value" id="stat-cities">{{ analysis_results.total_unique_cities }}</span>
+                    <span class="stat-label">ערים ייחודיות</span>
+                </div>
+                <div class="stat-box" id="box-devices">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span class="stat-value" id="stat-devices">{{ analysis_results.total_unique_cameras }}</span>
+                    <span class="stat-label">מכשירים שונים</span>
+                </div>
+            </div>
+
+            <div class="insights-section">
+                <h2 class="insights-main-title">
+                    <i class="fas fa-brain"></i> אזהרות ותובנות מערכת
+                </h2>
+
+                <div class="insights-container" id="insights-container">
+                    {% if analysis_results.insights %}
+
+                        {% set ns = namespace(devices=[], gaps=[], times=[], others=[]) %}
+
+                        {% for insight in analysis_results.insights %}
+                            {% if insight.type in ['device_switch', 'multiple_devices'] %}
+                                {% set ns.devices = ns.devices + [insight] %}
+                            {% elif insight.type == 'time_gap' %}
+                                {% set ns.gaps = ns.gaps + [insight] %}
+                            {% elif insight.type == 'usage_time' %}
+                                {% set ns.times = ns.times + [insight] %}
+                            {% else %}
+                                {% set ns.others = ns.others + [insight] %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {% macro render_insight(insight, is_warning) %}
+                            {% set parts = insight.text.split(':', 1) %}
+                            {% set clean_msg = parts[1] if parts|length > 1 else insight.text %}
+                            {% set cities_str = insight.cities | join(',') %}
+                            {% set devices_str = insight.devices | join(',') %}
+
+                            <details class="insight-card js-insight-card {{ 'warning-card' if is_warning else 'info-card' }}" data-cities="{{ cities_str }}" data-devices="{{ devices_str }}">
+                                <summary class="insight-summary">
+                                    {% if is_warning %}
+                                        <i class="fas fa-exclamation-triangle warning-icon"></i>
+                                    {% else %}
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                    {% endif %}
+                                    <span class="insight-main-title">
+                                        <i class="fas fa-camera" style="color: #8b949e;"></i> {{ insight.devices | join(' ➔ ') }}
+                                    </span>
+                                    {% if insight.date %}
+                                        <span class="insight-date-badge"><i class="fas fa-calendar-day"></i> {{ insight.date }}</span>
+                                    {% endif %}
+                                    <i class="fas fa-chevron-down toggle-icon"></i>
+                                </summary>
+                                <div class="insight-body js-insight-text">{{ clean_msg }}</div>
+                            </details>
+                        {% endmacro %}
+
+                        {% if ns.devices %}
+                            <div class="category-header js-category"><i class="fas fa-mobile-alt"></i> החלפות ציוד ומכשירים</div>
+                            <div class="category-grid js-category-grid">
+                                {% for insight in ns.devices %} {{ render_insight(insight, true) }} {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if ns.gaps %}
+                            <div class="category-header js-category"><i class="fas fa-calendar-times"></i> פערי זמן וניתוקים</div>
+                            <div class="category-grid js-category-grid">
+                                {% for insight in ns.gaps %} {{ render_insight(insight, true) }} {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if ns.times %}
+                            <div class="category-header js-category"><i class="fas fa-clock"></i> היסטוריית שימוש במצלמות</div>
+                            <div class="category-grid js-category-grid">
+                                {% for insight in ns.times %} {{ render_insight(insight, false) }} {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="insight-empty">
+                            <i class="fas fa-check-circle" style="color: #39ff14; font-size: 1.5em; margin-bottom: 10px; display: block;"></i>
+                            לא נמצאו אנומליות או תובנות חריגות בסריקה זו.
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
-        <div class="insights-section">
-            <h2 class="insights-main-title">
-                <i class="fas fa-brain"></i> אזהרות ותובנות מערכת
-            </h2>
+        <div id="map" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid #1a365d;">
+                <div>
+                    <button id="focus-map-btn" class="cyber-btn" onclick="focusOnMapTarget()">
+                        <i class="fas fa-crosshairs"></i> מיקוד במפה
+                    </button>
+                    <button id="end-focus-btn" class="cyber-btn" onclick="endFocusMap()" style="display: none; border-color: #ffc107; color: #ffc107;">
+                        <i class="fas fa-compress-arrows-alt"></i> סיום מיקוד וחזרה
+                    </button>
 
-            <div class="insights-container" id="insights-container">
+                    <span id="map-focus-msg" style="color: #ff4444; margin-right: 15px; display: none; font-weight: bold; background: rgba(255,68,68,0.1); padding: 5px 10px; border-radius: 5px;">
+                        <i class="fas fa-exclamation-circle"></i> לא נמצא אזור למיקוד לפי הסינון הנוכחי
+                    </span>
+                    <span id="map-focus-success" style="color: #39ff14; margin-right: 15px; display: none; font-weight: bold; background: rgba(57,255,20,0.1); padding: 5px 10px; border-radius: 5px;">
+                        <i class="fas fa-check-circle"></i> נמצאה תוצאה - מבצע מיקוד
+                    </span>
+                </div>
+                <button onclick="document.getElementById('btn-summary').click()" class="close-map-btn">
+                    <i class="fas fa-times"></i> סגור מפה
+                </button>
+            </div>
+            {{ map_html | safe }}
+        </div>
+
+        <div id="timeline" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid #1a365d;">
+                <div>
+                    <button id="focus-timeline-btn" class="cyber-btn" onclick="focusOnTimeline()">
+                        <i class="fas fa-expand-arrows-alt"></i> מיקוד בגרף
+                    </button>
+                    <button id="end-focus-timeline-btn" class="cyber-btn" onclick="endFocusTimeline()" style="display: none; border-color: #ffc107; color: #ffc107;">
+                        <i class="fas fa-compress-arrows-alt"></i> סיום מיקוד וחזרה
+                    </button>
+                </div>
+                <button onclick="document.getElementById('btn-summary').click()" class="close-map-btn">
+                    <i class="fas fa-times"></i> סגור ציר זמן
+                </button>
+            </div>
+            {{ timeline_html | safe }}
+        </div>
+
+        <div id="story" class="tab-content">
+            <div id="story-search-tools" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid #1a365d;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="story-search-msg" style="font-weight: bold; padding: 5px 10px; border-radius: 5px; display: none;"></span>
+                </div>
+                <button onclick="downloadPDF()" class="cyber-btn" style="background: transparent;">
+                    <i class="fas fa-file-pdf"></i> הדפס / שמר כ-PDF
+                </button>
+            </div>
+
+            <div id="narrative-document" style="background: #e6edf3; color: #0d1117; padding: 40px; border-radius: 8px; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.8; text-align: right; box-shadow: inset 0 0 20px rgba(0,0,0,0.1);">
+
+                <h2 style="color: #0d1117; border-bottom: 2px solid #0d1117; padding-bottom: 10px; text-align: center;">
+                    <i class="fas fa-shield-alt"></i> דו"ח מודיעין פורנזי מסכם
+                </h2>
+
+                <p><strong>תקציר מנהלים:</strong><br>
+                במסגרת הסריקה הנוכחית, נותחו בהצלחה <strong>{{ analysis_results.total_images }}</strong> קבצי מדיה.
+                מתוכם, ל-<strong>{{ analysis_results.images_with_gps }}</strong> קבצים מצאנו נתוני מיקום מדויקים (GPS), ול-<strong>{{ analysis_results.images_with_datetime }}</strong> קבצים נמצאה חותמת זמן תקנית.
+                {% if analysis_results.date_range.start %}
+                חלון הזמן של החקירה מתפרס החל מ-<strong>{{ analysis_results.date_range.start }}</strong> ועד ל-<strong>{{ analysis_results.date_range.end }}</strong>.
+                {% endif %}
+                </p>
+
+                <p><strong>פרופיל תנועה ומרחב גיאוגרפי:</strong><br>
+                היעד פעל במספר מוקדים, כאשר המערכת זיהתה נוכחות ב-<strong>{{ analysis_results.total_unique_cities }}</strong> ערים ויישובים שונים.
+                {% if analysis_results.hottest_cities %}
+                אזורי הפעילות המרכזיים ביותר ("אזורים חמים") שבהם תועדה רוב הפעילות הם: <strong>{{ analysis_results.hottest_cities | join(', ') }}</strong>.
+                {% endif %}
+                </p>
+
+                <p><strong>אמצעי צילום ותקשורת:</strong><br>
+                התיעוד חושף שימוש ב-<strong>{{ analysis_results.total_unique_cameras }}</strong> מכשירים שונים במהלך התקופה.
+                המכשיר הדומיננטי ביותר שזוהה בזירה הוא <strong>
+                {% set top_device = analysis_results.devices_distribution.items()|sort(attribute=1, reverse=True)|first %}
+                {{ top_device[0] if top_device else 'לא ידוע' }}
+                </strong>.
+                </p>
+
                 {% if analysis_results.insights %}
-
-                    {% set ns = namespace(devices=[], gaps=[], times=[], others=[]) %}
-
+                <p style="color: #b00020;"><strong><i class="fas fa-exclamation-circle"></i> אינדיקציות ופעילות חריגה:</strong><br>
+                המערכת האנליטית שלנו זיהתה <strong>{{ analysis_results.insights | length }}</strong> אירועים הדורשים תשומת לב חקירתית:
+                <ul style="color: #b00020;">
                     {% for insight in analysis_results.insights %}
-                        {% if insight.type in ['device_switch', 'multiple_devices'] %}
-                            {% set ns.devices = ns.devices + [insight] %}
+                        {% if insight.type == 'device_switch' %}
+                        <li><strong>החלפת ציוד:</strong> תועד מעבר פתאומי בין מכשירים ({{ insight.devices | join(' ל- ') }}) בתאריך {{ insight.date }}. הדבר עשוי להעיד על ניסיון הסוואת עקבות או החלפת מכשיר מבצעי.</li>
                         {% elif insight.type == 'time_gap' %}
-                            {% set ns.gaps = ns.gaps + [insight] %}
-                        {% elif insight.type == 'usage_time' %}
-                            {% set ns.times = ns.times + [insight] %}
-                        {% else %}
-                            {% set ns.others = ns.others + [insight] %}
+                        <li><strong>נתק מבצעי:</strong> זוהה פער זמנים חריג של מעל 12 שעות ללא תיעוד, אשר הסתיים בתאריך {{ insight.date }} במכשיר {{ insight.devices[0] }}.</li>
                         {% endif %}
                     {% endfor %}
-
-                    {% macro render_insight(insight, is_warning) %}
-                        {% set parts = insight.text.split(':', 1) %}
-                        {% set clean_msg = parts[1] if parts|length > 1 else insight.text %}
-                        {% set cities_str = insight.cities | join(',') %}
-                        {% set devices_str = insight.devices | join(',') %}
-
-                        <details class="insight-card js-insight-card {{ 'warning-card' if is_warning else 'info-card' }}" data-cities="{{ cities_str }}" data-devices="{{ devices_str }}">
-                            <summary class="insight-summary">
-
-                                {% if is_warning %}
-                                    <i class="fas fa-exclamation-triangle warning-icon"></i>
-                                {% else %}
-                                    <i class="fas fa-info-circle info-icon"></i>
-                                {% endif %}
-
-                                <span class="insight-main-title">
-                                    <i class="fas fa-camera" style="color: #8b949e;"></i> {{ insight.devices | join(' ➔ ') }}
-                                </span>
-
-                                {% if insight.date %}
-                                    <span class="insight-date-badge"><i class="fas fa-calendar-day"></i> {{ insight.date }}</span>
-                                {% endif %}
-
-                                <i class="fas fa-chevron-down toggle-icon"></i>
-                            </summary>
-                            <div class="insight-body">{{ clean_msg }}</div>
-                        </details>
-                    {% endmacro %}
-
-                    {% if ns.devices %}
-                        <div class="category-header js-category"><i class="fas fa-mobile-alt"></i> החלפות ציוד ומכשירים</div>
-                        <div class="category-grid js-category-grid">
-                            {% for insight in ns.devices %} {{ render_insight(insight, true) }} {% endfor %}
-                        </div>
-                    {% endif %}
-
-                    {% if ns.gaps %}
-                        <div class="category-header js-category"><i class="fas fa-calendar-times"></i> פערי זמן וניתוקים</div>
-                        <div class="category-grid js-category-grid">
-                            {% for insight in ns.gaps %} {{ render_insight(insight, true) }} {% endfor %}
-                        </div>
-                    {% endif %}
-
-                    {% if ns.times %}
-                        <div class="category-header js-category"><i class="fas fa-clock"></i> היסטוריית שימוש במצלמות</div>
-                        <div class="category-grid js-category-grid">
-                            {% for insight in ns.times %} {{ render_insight(insight, false) }} {% endfor %}
-                        </div>
-                    {% endif %}
-
+                </ul>
+                </p>
                 {% else %}
-                    <div class="insight-empty">
-                        <i class="fas fa-check-circle" style="color: #39ff14; font-size: 1.5em; margin-bottom: 10px; display: block;"></i>
-                        לא נמצאו אנומליות או תובנות חריגות בסריקה זו.
-                    </div>
+                <p style="color: #1a7f37;"><strong><i class="fas fa-check-circle"></i> אינדיקציות:</strong> לא זוהו קפיצות זמן חריגות או החלפות ציוד חשודות המעידות על שינוי דפוס פעולה.</p>
                 {% endif %}
+
+                <div style="margin-top: 50px; text-align: left; font-size: 0.9em; color: #57606a;">
+                    <hr style="border: 0; border-top: 1px solid #d0d7de; margin-bottom: 10px;">
+                    הופק אוטומטית על ידי מערכת סריקת תמונות סייבר<br>
+                    תאריך הפקה: <span id="current-date"></span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="map" class="tab-content">
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
-            <button onclick="document.getElementById('btn-summary').click()" class="close-map-btn">
-                <i class="fas fa-times"></i> סגור מפה
-            </button>
+        <div class="action-bar">
+            <a href="/" class="cyber-btn" style="background: transparent;"><i class="fas fa-home"></i> חזרה לחיפוש חדש</a>
         </div>
-        {{ map_html | safe }}
-    </div>
-
-    <div id="timeline" class="tab-content">
-        {{ timeline_html | safe }}
-    </div>
-
-    <div id="story" class="tab-content">
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
-            <button onclick="downloadPDF()" class="cyber-btn" style="width: auto; padding: 10px 20px; font-size: 14px;">
-                <i class="fas fa-file-pdf"></i> הדפס / שמר כ-PDF
-            </button>
-        </div>
-
-        <div id="narrative-document" style="background: #e6edf3; color: #0d1117; padding: 40px; border-radius: 8px; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.8; text-align: right; box-shadow: inset 0 0 20px rgba(0,0,0,0.1);">
-
-            <h2 style="color: #0d1117; border-bottom: 2px solid #0d1117; padding-bottom: 10px; text-align: center;">
-                <i class="fas fa-shield-alt"></i> דו"ח מודיעין פורנזי מסכם
-            </h2>
-
-            <p><strong>תקציר מנהלים:</strong><br>
-            במסגרת הסריקה הנוכחית, נותחו בהצלחה <strong>{{ analysis_results.total_images }}</strong> קבצי מדיה.
-            מתוכם, ל-<strong>{{ analysis_results.images_with_gps }}</strong> קבצים מצאנו נתוני מיקום מדויקים (GPS), ול-<strong>{{ analysis_results.images_with_datetime }}</strong> קבצים נמצאה חותמת זמן תקנית.
-            {% if analysis_results.date_range.start %}
-            חלון הזמן של החקירה מתפרס החל מ-<strong>{{ analysis_results.date_range.start }}</strong> ועד ל-<strong>{{ analysis_results.date_range.end }}</strong>.
-            {% endif %}
-            </p>
-
-            <p><strong>פרופיל תנועה ומרחב גיאוגרפי:</strong><br>
-            היעד פעל במספר מוקדים, כאשר המערכת זיהתה נוכחות ב-<strong>{{ analysis_results.total_unique_cities }}</strong> ערים ויישובים שונים.
-            {% if analysis_results.hottest_cities %}
-            אזורי הפעילות המרכזיים ביותר ("אזורים חמים") שבהם תועדה רוב הפעילות הם: <strong>{{ analysis_results.hottest_cities | join(', ') }}</strong>.
-            {% endif %}
-            </p>
-
-            <p><strong>אמצעי צילום ותקשורת:</strong><br>
-            התיעוד חושף שימוש ב-<strong>{{ analysis_results.total_unique_cameras }}</strong> מכשירים שונים במהלך התקופה.
-            המכשיר הדומיננטי ביותר שזוהה בזירה הוא <strong>
-            {% set top_device = analysis_results.devices_distribution.items()|sort(attribute=1, reverse=True)|first %}
-            {{ top_device[0] if top_device else 'לא ידוע' }}
-            </strong>.
-            </p>
-
-            {% if analysis_results.insights %}
-            <p style="color: #b00020;"><strong><i class="fas fa-exclamation-circle"></i> אינדיקציות ופעילות חריגה:</strong><br>
-            המערכת האנליטית שלנו זיהתה <strong>{{ analysis_results.insights | length }}</strong> אירועים הדורשים תשומת לב חקירתית:
-            <ul style="color: #b00020;">
-                {% for insight in analysis_results.insights %}
-                    {% if insight.type == 'device_switch' %}
-                    <li><strong>החלפת ציוד:</strong> תועד מעבר פתאומי בין מכשירים ({{ insight.devices | join(' ל- ') }}) בתאריך {{ insight.date }}. הדבר עשוי להעיד על ניסיון הסוואת עקבות או החלפת מכשיר מבצעי.</li>
-                    {% elif insight.type == 'time_gap' %}
-                    <li><strong>נתק מבצעי:</strong> זוהה פער זמנים חריג של מעל 12 שעות ללא תיעוד, אשר הסתיים בתאריך {{ insight.date }} במכשיר {{ insight.devices[0] }}.</li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            </p>
-            {% else %}
-            <p style="color: #1a7f37;"><strong><i class="fas fa-check-circle"></i> אינדיקציות:</strong> לא זוהו קפיצות זמן חריגות או החלפות ציוד חשודות המעידות על שינוי דפוס פעולה.</p>
-            {% endif %}
-
-            <div style="margin-top: 50px; text-align: left; font-size: 0.9em; color: #57606a;">
-                <hr style="border: 0; border-top: 1px solid #d0d7de; margin-bottom: 10px;">
-                הופק אוטומטית על ידי מערכת סריקת תמונות סייבר<br>
-                תאריך הפקה: <span id="current-date"></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="action-bar">
-        <a href="/" class="cyber-btn"><i class="fas fa-home"></i> חזרה לחיפוש חדש</a>
     </div>
 
     <script>
-        // פונקציה שמזריקה את התאריך של היום לתוך הדו"ח
+        // הבאת הנתונים הגולמיים מפייתון אל ה-JavaScript כדי לאפשר חיתוכים מתמטיים מדוייקים
+        const rawAnalysisData = {{ analysis_results | tojson | safe }};
+        const allImagesData = {{ images_data | tojson | safe }};
+        window.originalReportHtml = null;
+
+        let activeCities = new Set();
+        let activeDevices = new Set();
+    </script>
+
+    <script>
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('current-date').innerText = new Date().toLocaleDateString('he-IL');
+            window.originalReportHtml = document.getElementById('narrative-document').innerHTML;
+            setupMultiSelectFilters();
+
+            // אתחול ספירה מדוייקת גם בטעינה הראשונית ליתר ביטחון
+            triggerGlobalSearch();
         });
 
-        // הפעלת מנוע ה-PDF המובנה של הדפדפן להדפסה מושלמת בעברית
         function downloadPDF() {
             window.print();
         }
@@ -370,74 +424,326 @@
             } else {
                 document.getElementById('btn-summary').classList.add("active");
             }
+
+            // פתרון לבאג הרוחב של פלוטלי: טריגר לחישוב מחדש של ממדי המסך
+            window.dispatchEvent(new Event('resize'));
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const filterBtns = document.querySelectorAll('.filter-tag');
-            const insightCards = document.querySelectorAll('.js-insight-card');
-            const categories = document.querySelectorAll('.js-category');
-            const categoryGrids = document.querySelectorAll('.js-category-grid');
-
-            let activeFilters = { city: 'all', device: 'all' };
-
-            filterBtns.forEach(btn => {
+        function setupMultiSelectFilters() {
+            document.querySelectorAll('.js-filter-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const type = e.target.dataset.type;
                     const value = e.target.dataset.value;
 
-                    document.querySelectorAll(`.filter-tag[data-type="${type}"]`).forEach(b => b.classList.remove('active'));
-                    e.target.classList.add('active');
+                    if (value === 'all') {
+                        if (type === 'city') activeCities.clear();
+                        if (type === 'device') activeDevices.clear();
+                    } else {
+                        let targetSet = (type === 'city') ? activeCities : activeDevices;
+                        if (targetSet.has(value)) {
+                            targetSet.delete(value);
+                        } else {
+                            targetSet.add(value);
+                        }
+                    }
 
-                    activeFilters[type] = value;
-                    applyFilters();
+                    updateFilterButtonsUI();
+                    triggerGlobalSearch();
                 });
             });
+        }
 
-            function applyFilters() {
-                let visibleCities = new Set();
-                let visibleDevices = new Set();
+        function updateFilterButtonsUI() {
+            document.querySelectorAll('.js-filter-btn').forEach(btn => {
+                const type = btn.dataset.type;
+                const val = btn.dataset.value;
 
-                insightCards.forEach(card => {
-                    const cardCities = card.dataset.cities ? card.dataset.cities.split(',') : [];
-                    const cardDevices = card.dataset.devices ? card.dataset.devices.split(',') : [];
+                if (val === 'all') {
+                    const isActive = (type === 'city') ? activeCities.size === 0 : activeDevices.size === 0;
+                    if (isActive) btn.classList.add('active'); else btn.classList.remove('active');
+                } else {
+                    const isActive = (type === 'city') ? activeCities.has(val) : activeDevices.has(val);
+                    if (isActive) btn.classList.add('active'); else btn.classList.remove('active');
+                }
+            });
+        }
 
-                    const matchCity = (activeFilters.city === 'all' || cardCities.includes(activeFilters.city));
-                    const matchDevice = (activeFilters.device === 'all' || cardDevices.includes(activeFilters.device));
+        const searchInput = document.getElementById('global-search');
+        let searchTimeout = null;
 
-                    if (matchCity && matchDevice) {
-                        card.style.display = 'block';
-                        cardCities.forEach(c => visibleCities.add(c));
-                        cardDevices.forEach(d => visibleDevices.add(d));
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => { triggerGlobalSearch(); }, 300);
+            });
+        }
 
-                document.querySelectorAll('.filter-tag[data-type="device"]').forEach(btn => {
-                    const val = btn.dataset.value;
-                    if (val === 'all' || activeFilters.city === 'all' || visibleDevices.has(val)) {
-                        btn.classList.remove('disabled');
-                    } else {
-                        btn.classList.add('disabled');
-                    }
-                });
+        function triggerGlobalSearch() {
+            const term = searchInput.value.toLowerCase().trim();
+            handleSmartSearch(term);
+        }
 
-                document.querySelectorAll('.filter-tag[data-type="city"]').forEach(btn => {
-                    const val = btn.dataset.value;
-                    if (val === 'all' || activeFilters.device === 'all' || visibleCities.has(val)) {
-                        btn.classList.remove('disabled');
-                    } else {
-                        btn.classList.add('disabled');
-                    }
-                });
+        function handleSmartSearch(term) {
+            const hasFilters = activeCities.size > 0 || activeDevices.size > 0;
+            const hasText = term !== "";
 
-                categoryGrids.forEach((grid, index) => {
-                    const hasVisibleCards = Array.from(grid.children).some(card => card.style.display !== 'none');
-                    grid.style.display = hasVisibleCards ? 'grid' : 'none';
-                    if(categories[index]) categories[index].style.display = hasVisibleCards ? 'flex' : 'none';
-                });
+            // --- 1. ספירה מדוייקת מתוך התמונות הגולמיות בחיתוך בזמן אמת ---
+            let visibleImages = 0;
+            let visibleGps = 0;
+            let visibleCitiesSet = new Set();
+            let visibleDevicesSet = new Set();
+
+            allImagesData.forEach(img => {
+                const city = img.city || "Unknown";
+                const make = img.camera_make || "";
+                const model = img.camera_model || "";
+                const device = (make + " " + model).trim() || "Unknown";
+                const hasGps = img.has_gps || (img.latitude && img.longitude);
+
+                let matchFilter = true;
+                if (activeCities.size > 0 && !activeCities.has(city)) matchFilter = false;
+                if (activeDevices.size > 0 && !activeDevices.has(device)) matchFilter = false;
+
+                const searchText = (city + " " + device + " " + (img.filename || "")).toLowerCase();
+                const matchText = hasText && searchText.includes(term);
+
+                let isVisible = false;
+                if (!hasFilters && !hasText) {
+                    isVisible = true;
+                } else if (hasFilters && !hasText) {
+                    isVisible = matchFilter;
+                } else if (!hasFilters && hasText) {
+                    isVisible = matchText;
+                } else {
+                    isVisible = matchFilter || matchText;
+                }
+
+                if (isVisible) {
+                    visibleImages++;
+                    if (hasGps) visibleGps++;
+                    visibleCitiesSet.add(city);
+                    visibleDevicesSet.add(device);
+                }
+            });
+
+            document.getElementById('stat-images').innerText = visibleImages;
+            document.getElementById('stat-gps').innerText = visibleGps;
+            document.getElementById('stat-cities').innerText = visibleCitiesSet.size;
+            document.getElementById('stat-devices').innerText = visibleDevicesSet.size;
+            document.getElementById('banner-total').innerText = visibleImages;
+
+            const searchStatus = document.getElementById('search-status');
+            if (!hasFilters && !hasText) {
+                searchStatus.innerHTML = "המערכת מציגה נתונים גלובליים מכלל התיקייה";
+            } else {
+                searchStatus.innerHTML = `<i class="fas fa-filter"></i> חיתוך פעיל - מוצגים נתונים המותאמים לסינון.`;
             }
-        });
+
+            // --- 2. טיפול בקלפי התובנות והאזהרות ---
+            let insightHits = 0;
+            const insightCards = document.querySelectorAll('.js-insight-card');
+            insightCards.forEach(card => {
+                const textContent = card.innerText.toLowerCase();
+                const cardCities = (card.dataset.cities || "").split(',');
+                const cardDevices = (card.dataset.devices || "").split(',');
+
+                let matchFilter = true;
+                if (activeCities.size > 0 && !cardCities.some(c => activeCities.has(c))) matchFilter = false;
+                if (activeDevices.size > 0 && !cardDevices.some(d => activeDevices.has(d))) matchFilter = false;
+
+                const matchText = hasText && (textContent.includes(term) || cardCities.join(' ').toLowerCase().includes(term) || cardDevices.join(' ').toLowerCase().includes(term));
+
+                let showCard = false;
+                if (!hasFilters && !hasText) {
+                    showCard = true;
+                } else if (hasFilters && !hasText) {
+                    showCard = matchFilter;
+                } else if (!hasFilters && hasText) {
+                    showCard = matchText;
+                } else {
+                    showCard = matchFilter || matchText;
+                }
+
+                if (showCard) {
+                    card.style.display = 'block';
+                    insightHits++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            document.querySelectorAll('.js-category-grid').forEach((grid, index) => {
+                const hasVisibleCards = Array.from(grid.children).some(card => card.style.display !== 'none');
+                grid.style.display = hasVisibleCards ? 'grid' : 'none';
+                const headers = document.querySelectorAll('.js-category');
+                if(headers[index]) headers[index].style.display = hasVisibleCards ? 'flex' : 'none';
+            });
+
+            // --- 3. טיפול בגרף ציר הזמן ---
+            const graph = document.getElementById('cyber_timeline');
+            if (graph && graph.data && window.Plotly) {
+                if (!hasFilters && !hasText) {
+                    Plotly.restyle(graph, {'marker.opacity': 1});
+                } else {
+                    const markerOpacities = graph.data.map(trace => {
+                        if (!trace.customdata) return 1;
+                        return trace.customdata.map(pt => {
+                            let ptCity = pt[4] ? String(pt[4]) : "";
+                            let ptDevice = pt[2] ? String(pt[2]) : trace.name;
+                            let ptFiles = pt[1] ? String(pt[1]) : "";
+
+                            let ptText = (ptDevice + " " + ptCity + " " + ptFiles).toLowerCase();
+
+                            let matchFilter = true;
+                            if (activeCities.size > 0 && !activeCities.has(ptCity)) matchFilter = false;
+                            if (activeDevices.size > 0 && !activeDevices.has(ptDevice)) matchFilter = false;
+
+                            const matchText = hasText && ptText.includes(term);
+
+                            let showPoint = false;
+                            if (hasFilters && !hasText) showPoint = matchFilter;
+                            else if (!hasFilters && hasText) showPoint = matchText;
+                            else showPoint = matchFilter || matchText;
+
+                            return showPoint ? 1 : 0.05;
+                        });
+                    });
+                    Plotly.restyle(graph, {'marker.opacity': markerOpacities});
+                }
+            }
+
+            // --- 4. טיפול במסמך חקירה מסכם ---
+            const report = document.getElementById('narrative-document');
+            if (report && window.originalReportHtml) {
+                report.innerHTML = window.originalReportHtml;
+
+                let termsToHighlight = [];
+                if (hasText) termsToHighlight.push(term);
+                activeCities.forEach(c => termsToHighlight.push(c.toLowerCase()));
+                activeDevices.forEach(d => termsToHighlight.push(d.toLowerCase()));
+
+                const msgElement = document.getElementById('story-search-msg');
+
+                if (termsToHighlight.length > 0) {
+                    let matchCount = 0;
+                    const elementsToHighlight = report.querySelectorAll('p, li, strong');
+                    elementsToHighlight.forEach(el => {
+                        if(el.children.length === 0 || el.tagName === 'STRONG' || el.tagName === 'LI') {
+                            let originalText = el.innerHTML;
+                            termsToHighlight.forEach(t => {
+                                const safeT = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                                const regex = new RegExp(`(${safeT})`, 'gi');
+                                if (regex.test(originalText)) {
+                                    matchCount += originalText.match(regex).length;
+                                    originalText = originalText.replace(regex, `<span class="highlight-glow">$1</span>`);
+                                }
+                            });
+                            el.innerHTML = originalText;
+                        }
+                    });
+
+                    msgElement.style.display = 'inline-block';
+                    if (matchCount > 0) {
+                        msgElement.style.color = '#39ff14';
+                        msgElement.style.background = 'rgba(57,255,20,0.1)';
+                        msgElement.innerHTML = `<i class="fas fa-check-circle"></i> נמצאו ${matchCount} התאמות`;
+                    } else {
+                        msgElement.style.color = '#ff4444';
+                        msgElement.style.background = 'rgba(255,68,68,0.1)';
+                        msgElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> לא נמצאו תוצאות במסמך זה`;
+                    }
+                } else {
+                    msgElement.style.display = 'none';
+                }
+            }
+        }
+
+        // ביטול המצב הצף לאחר מיקוד במפה
+        window.focusOnMapTarget = function() {
+            const term = searchInput.value.toLowerCase().trim();
+            const msgElement = document.getElementById('map-focus-msg');
+            const successElement = document.getElementById('map-focus-success');
+            let bounds = [];
+
+            msgElement.style.display = 'none';
+            successElement.style.display = 'none';
+
+            const mapData = window.cyberMapData;
+            const mapObj = window.myCyberMap;
+
+            if (mapObj && mapData) {
+                const hasFilters = activeCities.size > 0 || activeDevices.size > 0;
+                const hasText = term !== "";
+
+                mapData.forEach(p => {
+                    let matchFilter = true;
+                    if (activeCities.size > 0 && !activeCities.has(p.city)) matchFilter = false;
+                    if (activeDevices.size > 0 && !activeDevices.has(p.device)) matchFilter = false;
+
+                    const matchText = hasText && p.text.includes(term);
+
+                    let showPoint = false;
+                    if (!hasFilters && !hasText) {
+                        showPoint = true;
+                    } else if (hasFilters && !hasText) {
+                        showPoint = matchFilter;
+                    } else if (!hasFilters && hasText) {
+                        showPoint = matchText;
+                    } else {
+                        showPoint = matchFilter || matchText;
+                    }
+
+                    if (showPoint) {
+                        bounds.push([p.lat, p.lon]);
+                    }
+                });
+
+                if (bounds.length > 0) {
+                    successElement.style.display = 'inline-block';
+                    mapObj.flyToBounds(bounds, {padding: [50, 50], duration: 1.5});
+
+                    document.querySelector('.sticky-top-bar').classList.add('unpinned');
+                    document.getElementById('end-focus-btn').style.display = 'inline-block';
+                    document.getElementById('focus-map-btn').style.display = 'none';
+                    setTimeout(() => {
+                        document.getElementById('map').scrollIntoView({behavior: 'smooth', block: 'start'});
+                        successElement.style.display = 'none';
+                    }, 500);
+
+                } else {
+                    msgElement.style.display = 'inline-block';
+                    setTimeout(() => { msgElement.style.display = 'none'; }, 4000);
+                }
+            } else {
+                console.log("המפה עדיין לא נטענה לחלוטין או שגיאת Iframe.");
+            }
+        };
+
+        window.endFocusMap = function() {
+            document.querySelector('.sticky-top-bar').classList.remove('unpinned');
+            document.getElementById('end-focus-btn').style.display = 'none';
+            document.getElementById('focus-map-btn').style.display = 'inline-block';
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        };
+
+        // פונקציות מיקוד וחזרה לציר הזמן
+        window.focusOnTimeline = function() {
+            document.querySelector('.sticky-top-bar').classList.add('unpinned');
+            document.getElementById('end-focus-timeline-btn').style.display = 'inline-block';
+            document.getElementById('focus-timeline-btn').style.display = 'none';
+            setTimeout(() => {
+                document.getElementById('timeline').scrollIntoView({behavior: 'smooth', block: 'start'});
+                // אילוץ חישוב רוחב מחדש למקרה שהגרף לא נמתח
+                window.dispatchEvent(new Event('resize'));
+            }, 100);
+        };
+
+        window.endFocusTimeline = function() {
+            document.querySelector('.sticky-top-bar').classList.remove('unpinned');
+            document.getElementById('end-focus-timeline-btn').style.display = 'none';
+            document.getElementById('focus-timeline-btn').style.display = 'inline-block';
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        };
     </script>
 </body>
 </html>
