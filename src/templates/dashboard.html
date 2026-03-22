@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>דשבורד מודיעין מרכזי</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+    <link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+
     <style>
         html, body {
             background-color: #06142e;
@@ -44,6 +49,7 @@
             box-shadow: 0 0 10px rgba(88, 166, 255, 0.2); transition: 0.3s; box-sizing: border-box;
         }
         .cyber-search-input:focus { border-color: #39ff14; box-shadow: 0 0 15px rgba(57, 255, 20, 0.4); outline: none; }
+        .cyber-search-input:disabled { border-color: #444; color: #888; background: #111; cursor: not-allowed; box-shadow: none; }
         .search-icon { position: absolute; right: 15px; top: 15px; color: #58a6ff; font-size: 1.1em; }
         .search-status { text-align: center; color: #8b949e; font-size: 0.95em; height: 20px; margin-bottom: 15px; }
         .highlight-glow { background-color: #ffc107; color: #000; border-radius: 3px; box-shadow: 0 0 8px rgba(255, 193, 7, 0.8); padding: 0 3px; font-weight: bold; transition: 0.3s; }
@@ -57,6 +63,23 @@
         .filter-tag { background: #161b22; border: 1px solid #30363d; color: #c9d1d9; padding: 6px 15px; border-radius: 15px; cursor: pointer; font-size: 0.9em; transition: 0.3s; }
         .filter-tag:hover { border-color: #58a6ff; }
         .filter-tag.active { background: #58a6ff; color: #000; border-color: #58a6ff; font-weight: bold; }
+
+        /* עיצוב שדות התאריך החדשים כדי שיראו כמו כפתורי הסינון */
+        .cyber-date-input {
+            background: #161b22;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: 0.3s;
+            font-size: 0.9em;
+        }
+        .cyber-date-input:focus {
+            border-color: #58a6ff;
+            box-shadow: 0 0 8px rgba(88, 166, 255, 0.3);
+        }
 
         .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 5px; }
         .tab-btn { background: #0b1f40; border: 1px solid #1a365d; color: #8b949e; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: 0.3s; }
@@ -130,7 +153,7 @@
 
             <div class="search-container">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" id="global-search" class="cyber-search-input" placeholder="חיפוש חופשי להוספה לסינון (ירושלים, Apple, מפה...)">
+                <input type="text" id="global-search" class="cyber-search-input" placeholder="טוען נתונים ברקע, נא להמתין..." disabled>
             </div>
 
             <div class="filters-section">
@@ -153,12 +176,21 @@
                         {% endfor %}
                     </div>
                 </div>
+
+                <div class="filter-group" id="date-filter-group" style="display: none;">
+                    <div class="filter-title"><i class="fas fa-calendar-alt"></i> סינון לפי תאריך:</div>
+                    <div class="filter-buttons" style="align-items: center;">
+                        <input type="date" id="header-timeline-start" class="cyber-date-input" onchange="handleDateFilterChange()">
+                        <span style="color: #8b949e; margin: 0 5px; font-weight: bold;">עד</span>
+                        <input type="date" id="header-timeline-end" class="cyber-date-input" onchange="handleDateFilterChange()">
+                    </div>
+                </div>
             </div>
 
             <div class="tab-container">
                 <button id="btn-summary" class="tab-btn active" onclick="openTab(event, 'summary')"><i class="fas fa-chart-pie"></i> סיכום נתונים</button>
-                <button class="tab-btn" onclick="openTab(event, 'map')" {% if not map_available %}disabled{% endif %}><i class="fas fa-map-marked-alt"></i> מפת צילומים</button>
-                <button class="tab-btn" onclick="openTab(event, 'timeline')" {% if not timeline_available %}disabled{% endif %}><i class="fas fa-project-diagram"></i> ציר זמן</button>
+                <button id="btn-map" class="tab-btn" onclick="openTab(event, 'map')" disabled><i id="icon-map" class="fas fa-spinner fa-spin"></i> מפת צילומים</button>
+                <button id="btn-timeline" class="tab-btn" onclick="openTab(event, 'timeline')" disabled><i id="icon-timeline" class="fas fa-spinner fa-spin"></i> ציר זמן</button>
                 <button class="tab-btn" onclick="openTab(event, 'story')"><i class="fas fa-file-signature"></i> דו"ח חקירה מסכם</button>
             </div>
         </div>
@@ -167,7 +199,7 @@
     <div class="content-area">
         <div id="summary" class="tab-content active">
 
-            <div id="search-status" class="search-status">המערכת מציגה נתונים גלובליים מכלל התיקייה</div>
+            <div id="search-status" class="search-status">המערכת מעבדת נתונים אסינכרונית...</div>
 
             <div class="scan-success-banner">
                 <h2><i class="fas fa-check-circle"></i> נסרקו בהצלחה <span id="banner-total">{{ analysis_results.total_images }}</span> תמונות</h2>
@@ -295,7 +327,9 @@
                     <i class="fas fa-times"></i> סגור מפה
                 </button>
             </div>
-            {{ map_html | safe }}
+            <div id="map-container" style="min-height: 400px; display: flex; justify-content: center; align-items: center; flex-direction: column; color: #58a6ff;">
+                <i class="fas fa-circle-notch fa-spin fa-3x"></i><h3 style="margin-top: 15px;">בונה מפת מיקומים ברקע...</h3>
+            </div>
         </div>
 
         <div id="timeline" class="tab-content">
@@ -312,7 +346,10 @@
                     <i class="fas fa-times"></i> סגור ציר זמן
                 </button>
             </div>
-            {{ timeline_html | safe }}
+
+            <div id="timeline-container" style="min-height: 400px; display: flex; justify-content: center; align-items: center; flex-direction: column; color: #39ff14;">
+                <i class="fas fa-circle-notch fa-spin fa-3x"></i><h3 style="margin-top: 15px;">מייצר ציר זמן פורנזי...</h3>
+            </div>
         </div>
 
         <div id="story" class="tab-content">
@@ -385,13 +422,13 @@
     </div>
 
     <script>
-        // הבאת הנתונים הגולמיים מפייתון אל ה-JavaScript כדי לאפשר חיתוכים מתמטיים מדוייקים
         const rawAnalysisData = {{ analysis_results | tojson | safe }};
-        const allImagesData = {{ images_data | tojson | safe }};
+        let allImagesData = [];
         window.originalReportHtml = null;
 
         let activeCities = new Set();
         let activeDevices = new Set();
+        const sessionId = "{{ session_id }}";
     </script>
 
     <script>
@@ -399,34 +436,34 @@
             document.getElementById('current-date').innerText = new Date().toLocaleDateString('he-IL');
             window.originalReportHtml = document.getElementById('narrative-document').innerHTML;
             setupMultiSelectFilters();
-
-            // אתחול ספירה מדוייקת גם בטעינה הראשונית ליתר ביטחון
-            triggerGlobalSearch();
         });
 
         function downloadPDF() {
             window.print();
         }
 
+        // ניהול כרטיסיות (Tabs) והצגה חכמה של פילטר התאריך
         function openTab(evt, tabName) {
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].classList.remove("active");
-            }
+            for (i = 0; i < tabcontent.length; i++) tabcontent[i].classList.remove("active");
+
             tablinks = document.getElementsByClassName("tab-btn");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].classList.remove("active");
-            }
+            for (i = 0; i < tablinks.length; i++) tablinks[i].classList.remove("active");
+
             document.getElementById(tabName).classList.add("active");
-            if(evt && evt.currentTarget) {
-                evt.currentTarget.classList.add("active");
-            } else {
-                document.getElementById('btn-summary').classList.add("active");
+            if(evt && evt.currentTarget) evt.currentTarget.classList.add("active");
+            else document.getElementById('btn-summary').classList.add("active");
+
+            // לוגיקת החלון החכם: מציג את סינון התאריכים אך ורק בכרטיסיית ציר הזמן
+            const dateFilterGroup = document.getElementById('date-filter-group');
+            if (dateFilterGroup) {
+                dateFilterGroup.style.display = (tabName === 'timeline') ? 'flex' : 'none';
             }
 
-            // פתרון לבאג הרוחב של פלוטלי: טריגר לחישוב מחדש של ממדי המסך
-            window.dispatchEvent(new Event('resize'));
+            if (tabName === 'timeline' && window.cyberTimeline) {
+                setTimeout(() => { window.cyberTimeline.redraw(); }, 100);
+            }
         }
 
         function setupMultiSelectFilters() {
@@ -478,6 +515,18 @@
             });
         }
 
+        // פונקציה חדשה ואוטומטית לטיפול בשינוי שדות התאריך ללא כפתורים
+        function handleDateFilterChange() {
+            const start = document.getElementById('header-timeline-start').value;
+            const end = document.getElementById('header-timeline-end').value;
+
+            if (start && end && window.applyTimelineFilterFromHeader) {
+                window.applyTimelineFilterFromHeader(start, end);
+            } else if (!start && !end && window.resetTimelineZoomFromHeader) {
+                window.resetTimelineZoomFromHeader();
+            }
+        }
+
         function triggerGlobalSearch() {
             const term = searchInput.value.toLowerCase().trim();
             handleSmartSearch(term);
@@ -487,59 +536,54 @@
             const hasFilters = activeCities.size > 0 || activeDevices.size > 0;
             const hasText = term !== "";
 
-            // --- 1. ספירה מדוייקת מתוך התמונות הגולמיות בחיתוך בזמן אמת ---
             let visibleImages = 0;
             let visibleGps = 0;
             let visibleCitiesSet = new Set();
             let visibleDevicesSet = new Set();
 
-            allImagesData.forEach(img => {
-                const city = img.city || "Unknown";
-                const make = img.camera_make || "";
-                const model = img.camera_model || "";
-                const device = (make + " " + model).trim() || "Unknown";
-                const hasGps = img.has_gps || (img.latitude && img.longitude);
+            if (allImagesData && allImagesData.length > 0) {
+                allImagesData.forEach(img => {
+                    const city = img.city || "Unknown";
+                    const make = img.camera_make || "";
+                    const model = img.camera_model || "";
+                    const device = (make + " " + model).trim() || "Unknown";
+                    const hasGps = img.has_gps || (img.latitude && img.longitude);
 
-                let matchFilter = true;
-                if (activeCities.size > 0 && !activeCities.has(city)) matchFilter = false;
-                if (activeDevices.size > 0 && !activeDevices.has(device)) matchFilter = false;
+                    let matchFilter = true;
+                    if (activeCities.size > 0 && !activeCities.has(city)) matchFilter = false;
+                    if (activeDevices.size > 0 && !activeDevices.has(device)) matchFilter = false;
 
-                const searchText = (city + " " + device + " " + (img.filename || "")).toLowerCase();
-                const matchText = hasText && searchText.includes(term);
+                    const searchText = (city + " " + device + " " + (img.filename || "")).toLowerCase();
+                    const matchText = hasText && searchText.includes(term);
 
-                let isVisible = false;
-                if (!hasFilters && !hasText) {
-                    isVisible = true;
-                } else if (hasFilters && !hasText) {
-                    isVisible = matchFilter;
-                } else if (!hasFilters && hasText) {
-                    isVisible = matchText;
-                } else {
-                    isVisible = matchFilter || matchText;
-                }
+                    let isVisible = false;
+                    if (!hasFilters && !hasText) isVisible = true;
+                    else if (hasFilters && !hasText) isVisible = matchFilter;
+                    else if (!hasFilters && hasText) isVisible = matchText;
+                    else isVisible = matchFilter || matchText;
 
-                if (isVisible) {
-                    visibleImages++;
-                    if (hasGps) visibleGps++;
-                    visibleCitiesSet.add(city);
-                    visibleDevicesSet.add(device);
-                }
-            });
+                    if (isVisible) {
+                        visibleImages++;
+                        if (hasGps) visibleGps++;
+                        visibleCitiesSet.add(city);
+                        visibleDevicesSet.add(device);
+                    }
+                });
 
-            document.getElementById('stat-images').innerText = visibleImages;
-            document.getElementById('stat-gps').innerText = visibleGps;
-            document.getElementById('stat-cities').innerText = visibleCitiesSet.size;
-            document.getElementById('stat-devices').innerText = visibleDevicesSet.size;
-            document.getElementById('banner-total').innerText = visibleImages;
+                document.getElementById('stat-images').innerText = visibleImages;
+                document.getElementById('stat-gps').innerText = visibleGps;
+                document.getElementById('stat-cities').innerText = visibleCitiesSet.size;
+                document.getElementById('stat-devices').innerText = visibleDevicesSet.size;
+                document.getElementById('banner-total').innerText = visibleImages;
+            }
 
             const searchStatus = document.getElementById('search-status');
             if (!hasFilters && !hasText) {
-                searchStatus.innerHTML = "המערכת מציגה נתונים גלובליים מכלל התיקייה";
+                searchStatus.innerHTML = "המערכת מוכנה. הנתונים נטענו במלואם.";
             } else {
                 searchStatus.innerHTML = `<i class="fas fa-filter"></i> חיתוך פעיל - מוצגים נתונים המותאמים לסינון.`;
             }
 
-            // --- 2. טיפול בקלפי התובנות והאזהרות ---
             let insightHits = 0;
             const insightCards = document.querySelectorAll('.js-insight-card');
             insightCards.forEach(card => {
@@ -554,15 +598,10 @@
                 const matchText = hasText && (textContent.includes(term) || cardCities.join(' ').toLowerCase().includes(term) || cardDevices.join(' ').toLowerCase().includes(term));
 
                 let showCard = false;
-                if (!hasFilters && !hasText) {
-                    showCard = true;
-                } else if (hasFilters && !hasText) {
-                    showCard = matchFilter;
-                } else if (!hasFilters && hasText) {
-                    showCard = matchText;
-                } else {
-                    showCard = matchFilter || matchText;
-                }
+                if (!hasFilters && !hasText) showCard = true;
+                else if (hasFilters && !hasText) showCard = matchFilter;
+                else if (!hasFilters && hasText) showCard = matchText;
+                else showCard = matchFilter || matchText;
 
                 if (showCard) {
                     card.style.display = 'block';
@@ -579,40 +618,35 @@
                 if(headers[index]) headers[index].style.display = hasVisibleCards ? 'flex' : 'none';
             });
 
-            // --- 3. טיפול בגרף ציר הזמן ---
-            const graph = document.getElementById('cyber_timeline');
-            if (graph && graph.data && window.Plotly) {
-                if (!hasFilters && !hasText) {
-                    Plotly.restyle(graph, {'marker.opacity': 1});
-                } else {
-                    const markerOpacities = graph.data.map(trace => {
-                        if (!trace.customdata) return 1;
-                        return trace.customdata.map(pt => {
-                            let ptCity = pt[4] ? String(pt[4]) : "";
-                            let ptDevice = pt[2] ? String(pt[2]) : trace.name;
-                            let ptFiles = pt[1] ? String(pt[1]) : "";
+            if (window.cyberTimelineItems && window.cyberTimelineOriginalData && window.cyberTimeline) {
+                const itemsToKeep = [];
 
-                            let ptText = (ptDevice + " " + ptCity + " " + ptFiles).toLowerCase();
+                window.cyberTimelineOriginalData.forEach(pt => {
+                    let matchFilter = true;
+                    if (activeCities.size > 0 && !activeCities.has(pt.search_city)) matchFilter = false;
+                    if (activeDevices.size > 0 && !activeDevices.has(pt.search_device)) matchFilter = false;
 
-                            let matchFilter = true;
-                            if (activeCities.size > 0 && !activeCities.has(ptCity)) matchFilter = false;
-                            if (activeDevices.size > 0 && !activeDevices.has(ptDevice)) matchFilter = false;
+                    const matchText = hasText && pt.search_text.includes(term);
 
-                            const matchText = hasText && ptText.includes(term);
+                    let showPoint = false;
+                    if (!hasFilters && !hasText) showPoint = true;
+                    else if (hasFilters && !hasText) showPoint = matchFilter;
+                    else if (!hasFilters && hasText) showPoint = matchText;
+                    else showPoint = matchFilter || matchText;
 
-                            let showPoint = false;
-                            if (hasFilters && !hasText) showPoint = matchFilter;
-                            else if (!hasFilters && hasText) showPoint = matchText;
-                            else showPoint = matchFilter || matchText;
+                    if (showPoint) {
+                        itemsToKeep.push(pt);
+                    }
+                });
 
-                            return showPoint ? 1 : 0.05;
-                        });
-                    });
-                    Plotly.restyle(graph, {'marker.opacity': markerOpacities});
+                window.cyberTimelineItems.clear();
+                window.cyberTimelineItems.add(itemsToKeep);
+
+                if (itemsToKeep.length > 0) {
+                    window.cyberTimeline.fit({animation: true});
                 }
             }
 
-            // --- 4. טיפול במסמך חקירה מסכם ---
             const report = document.getElementById('narrative-document');
             if (report && window.originalReportHtml) {
                 report.innerHTML = window.originalReportHtml;
@@ -658,7 +692,6 @@
             }
         }
 
-        // ביטול המצב הצף לאחר מיקוד במפה
         window.focusOnMapTarget = function() {
             const term = searchInput.value.toLowerCase().trim();
             const msgElement = document.getElementById('map-focus-msg');
@@ -683,15 +716,10 @@
                     const matchText = hasText && p.text.includes(term);
 
                     let showPoint = false;
-                    if (!hasFilters && !hasText) {
-                        showPoint = true;
-                    } else if (hasFilters && !hasText) {
-                        showPoint = matchFilter;
-                    } else if (!hasFilters && hasText) {
-                        showPoint = matchText;
-                    } else {
-                        showPoint = matchFilter || matchText;
-                    }
+                    if (!hasFilters && !hasText) showPoint = true;
+                    else if (hasFilters && !hasText) showPoint = matchFilter;
+                    else if (!hasFilters && hasText) showPoint = matchText;
+                    else showPoint = matchFilter || matchText;
 
                     if (showPoint) {
                         bounds.push([p.lat, p.lon]);
@@ -714,8 +742,6 @@
                     msgElement.style.display = 'inline-block';
                     setTimeout(() => { msgElement.style.display = 'none'; }, 4000);
                 }
-            } else {
-                console.log("המפה עדיין לא נטענה לחלוטין או שגיאת Iframe.");
             }
         };
 
@@ -726,15 +752,15 @@
             window.scrollTo({top: 0, behavior: 'smooth'});
         };
 
-        // פונקציות מיקוד וחזרה לציר הזמן
         window.focusOnTimeline = function() {
             document.querySelector('.sticky-top-bar').classList.add('unpinned');
             document.getElementById('end-focus-timeline-btn').style.display = 'inline-block';
             document.getElementById('focus-timeline-btn').style.display = 'none';
             setTimeout(() => {
                 document.getElementById('timeline').scrollIntoView({behavior: 'smooth', block: 'start'});
-                // אילוץ חישוב רוחב מחדש למקרה שהגרף לא נמתח
-                window.dispatchEvent(new Event('resize'));
+                if (window.cyberTimeline) {
+                    window.cyberTimeline.redraw();
+                }
             }, 100);
         };
 
@@ -744,6 +770,82 @@
             document.getElementById('focus-timeline-btn').style.display = 'inline-block';
             window.scrollTo({top: 0, behavior: 'smooth'});
         };
+
+        function executeInjectedScripts(container) {
+            const scripts = container.getElementsByTagName('script');
+            const scriptsArray = Array.from(scripts);
+
+            scriptsArray.forEach(script => {
+                const newScript = document.createElement('script');
+                if (script.src) {
+                    newScript.src = script.src;
+                    newScript.async = false;
+                } else {
+                    newScript.textContent = script.innerHTML;
+                }
+                document.body.appendChild(newScript);
+            });
+        }
+
+        async function loadDashboardSequentially() {
+            try {
+                console.log("מתחיל טעינת מפה...");
+                const mapResponse = await fetch('/api/map/' + sessionId);
+                const mapData = await mapResponse.json();
+
+                const mapContainer = document.getElementById('map-container');
+                if(mapData.available) {
+                    mapContainer.innerHTML = mapData.html;
+                    executeInjectedScripts(mapContainer);
+
+                    const btnMap = document.getElementById('btn-map');
+                    btnMap.disabled = false;
+                    btnMap.style.textDecoration = 'none';
+                    document.getElementById('icon-map').className = "fas fa-map-marked-alt";
+                } else {
+                    mapContainer.innerHTML = '<h3>אין מספיק נתוני מיקום להצגת המפה.</h3>';
+                }
+
+                console.log("מתחיל טעינת ציר זמן...");
+                const timeResponse = await fetch('/api/timeline/' + sessionId);
+                const timeData = await timeResponse.json();
+
+                const timeContainer = document.getElementById('timeline-container');
+                if(timeData.available) {
+                    timeContainer.innerHTML = timeData.html;
+                    executeInjectedScripts(timeContainer);
+
+                    const btnTime = document.getElementById('btn-timeline');
+                    btnTime.disabled = false;
+                    btnTime.style.textDecoration = 'none';
+                    document.getElementById('icon-timeline').className = "fas fa-project-diagram";
+                } else {
+                    timeContainer.innerHTML = '<h3>אין נתוני תאריך חוקיים להצגת ציר הזמן.</h3>';
+                }
+
+                console.log("מושך נתוני חיפוש...");
+                const rawRes = await fetch('/api/raw_data/' + sessionId);
+                const rawData = await rawRes.json();
+                if(rawData.available) {
+                    allImagesData = rawData.images_data;
+                }
+
+                console.log("טעינה הסתיימה. מנקה נתונים זמניים מהשרת...");
+                await fetch('/api/cleanup/' + sessionId, { method: 'POST' });
+
+                searchInput.disabled = false;
+                searchInput.placeholder = "חיפוש חופשי להוספה לסינון (ירושלים, Apple, מפה...)";
+                triggerGlobalSearch();
+
+            } catch (error) {
+                console.error("שגיאה במנוע האסינכרוני:", error);
+                fetch('/api/cleanup/' + sessionId, { method: 'POST' });
+            }
+        }
+
+        if(sessionId && sessionId !== "") {
+            loadDashboardSequentially();
+        }
     </script>
 </body>
 </html>

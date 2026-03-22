@@ -1,19 +1,13 @@
-import pandas as pd  # ספרייה חזקה לניהול ועיבוד נתונים (מסדרת לנו את המידע בטבלאות חכמות)
-import \
-    plotly.express as px  # 📊 פלוטלי: הספרייה שמציירת את הגרף עצמו (הופכת מספרים לאינטראקטיביות, מאפשרת ריחוף וזום בדפדפן)
-import \
-    base64  # 🖼️ בייס64: ספרייה ש"גורסת" קובץ תמונה והופכת אותו לטקסט ארוך. ככה התמונה נטמעת בתוך ה-HTML ולא נשברת כשמעבירים מחשב
-from pathlib import \
-    Path  # 📍 פאת'ליב: ה"GPS" של פייתון. יודע למצוא נתיבים אוטומטית בלי להתבלבל בין הסלאשים של ווינדוס ללינוקס
-
-# ייבוא פונקציית החילוץ מהקובץ השני שבניתם
-from extractor import extract_all
+import pandas as pd
+import json
+import base64
+import re
+from pathlib import Path
 
 # --- הגדרות גלובליות ונתיבים ---
-BASE_DIR = Path(__file__).resolve().parent  # מוצא את התיקייה שבה שמור הקובץ הנוכחי
-ICONS_DIR = BASE_DIR / "icons"  # מגדיר שהלוגואים נמצאים בתיקיית "icons" ליד הקובץ שלנו
+BASE_DIR = Path(__file__).resolve().parent
+ICONS_DIR = BASE_DIR / "icons"
 
-# מילון הלוגואים: שם היצרן מול שם הקובץ בתיקייה
 LOGO_FILES = {
     "Apple": "Apple-Logo.png",
     "Samsung": "Samsung-Logo-2.png",
@@ -26,7 +20,6 @@ LOGO_FILES_LOWER = {key.lower(): value for key, value in LOGO_FILES.items()}
 
 
 def get_b64_image(image_path):
-    """מקבלת נתיב לתמונה ומחזירה אותה כמחרוזת טקסט (Base64)"""
     try:
         with open(image_path, "rb") as img_file:
             return "data:image/png;base64," + base64.b64encode(img_file.read()).decode('utf-8')
@@ -35,10 +28,7 @@ def get_b64_image(image_path):
 
 
 def get_logos_html(makes_list):
-    """
-    מקבל רשימה של יצרנים, שולף את הלוגואים ומייצר תגיות HTML תקניות.
-    אלו יוצגו בחלון הצף העצמאי של ה-JS שלנו (ולא בזה של פלוטלי).
-    """
+    """שולף את הלוגואים ומייצר חלון קטן עם רקע לבן בתוך ה-Tooltip של Vis.js"""
     unique_makes = set(makes_list)
     html_elements = []
 
@@ -50,217 +40,293 @@ def get_logos_html(makes_list):
         if full_path.exists():
             b64 = get_b64_image(full_path)
             if b64:
-                # יצירת אלמנט עוטף לבן לכל לוגו שיבלוט ברקע הכהה, הצגה Side-by-Side
-                img_tag = f"<div style='background-color:#ffffff; padding:4px; border-radius:6px; margin:0 4px; display:inline-block;'><img src='{b64}' style='height:30px; width:auto; display:block;'></div>"
+                img_tag = f"<div style='background-color:#ffffff; padding:5px; border-radius:6px; margin:0 4px; display:inline-block;'><img src='{b64}' style='height:35px; width:auto; display:block;'></div>"
                 html_elements.append(img_tag)
 
     return "".join(html_elements)
 
 
+def hex_to_rgba(hex_color, alpha=0.1):
+    """פונקציית עזר להמרת צבעי הקסדצימל ל-RGBA שקוף"""
+    hex_color = hex_color.lstrip('#')
+    if len(hex_color) == 6:
+        r, g, b = tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
+        return f"rgba({r},{g},{b},{alpha})"
+    return "rgba(255,255,255,0.1)"
+
+
 def prepare_camera_data(raw_data):
-    """לוקחת את המילונים מהחילוץ, מנקה, ומקבצת תמונות זהות בזמן (Clustering)"""
     df = pd.DataFrame(raw_data)
-
+    if 'datetime' not in df.columns: return None
     df_clean = df.dropna(subset=['datetime']).copy()
+    if df_clean.empty: return None
 
-    if df_clean.empty:
-        return None
-
-    df_clean['datetime'] = pd.to_datetime(df_clean['datetime'], format="%Y:%m:%d %H:%M:%S")
+    df_clean['datetime'] = pd.to_datetime(df_clean['datetime'], format="%Y:%m:%d %H:%M:%S", errors='coerce')
+    df_clean = df_clean.dropna(subset=['datetime']).copy()
     df_clean['datetime_minute'] = df_clean['datetime'].dt.floor('min')
 
+    if 'camera_make' not in df_clean.columns: df_clean['camera_make'] = "Unknown"
+    if 'camera_model' not in df_clean.columns: df_clean['camera_model'] = "Unknown"
     df_clean['camera_make'] = df_clean['camera_make'].fillna("Unknown")
     df_clean['camera_model'] = df_clean['camera_model'].fillna("Unknown")
 
-    if 'city' in df_clean.columns:
-        df_clean['city'] = df_clean['city'].fillna("Unknown")
-    else:
-        df_clean['city'] = "Unknown"
-
     df_clean['display_name'] = df_clean.apply(
-        lambda r: r['camera_model'] if r['camera_model'] != "Unknown" else r['camera_make'], axis=1
+        lambda r: r['camera_model'] if str(r['camera_model']).strip() not in ["Unknown", ""] else r['camera_make'],
+        axis=1
     )
 
-    df_clean['coords'] = df_clean.apply(
-        lambda r: f"{r['latitude']:.4f}, {r['longitude']:.4f}" if pd.notnull(r['latitude']) else "No GPS", axis=1
-    )
+    if 'latitude' in df_clean.columns and 'longitude' in df_clean.columns:
+        df_clean['coords'] = df_clean.apply(
+            lambda r: f"{r['latitude']:.4f}, {r['longitude']:.4f}" if pd.notnull(r['latitude']) else "ללא GPS", axis=1
+        )
+    else:
+        df_clean['coords'] = "ללא GPS"
 
-    # שלב הקיבוץ והאיחוד של רשימות היצרנים
-    grouped = df_clean.groupby(['datetime_minute', 'display_name', 'camera_model', 'city']).agg(
-        count=('filename', 'count'),
-        filenames=('filename', lambda x: '<br>'.join(x.head(5)) + ('<br>...' if len(x) > 5 else '')),
-        coords=('coords', 'first'),
-        datetime=('datetime', 'first'),
-        makes_list=('camera_make', list)  # אוסף את כל היצרנים באותה נקודה
-    ).reset_index()
+    if 'city' in df_clean.columns:
+        df_clean['city_display'] = df_clean['city'].fillna("לא זוהתה עיר")
+    else:
+        df_clean['city_display'] = "לא זוהתה עיר"
 
-    grouped['make_model'] = grouped['makes_list'].apply(lambda x: x[0]) + " " + grouped['camera_model']
-    grouped['bubble_text'] = grouped['count'].apply(lambda x: str(x) if x > 1 else "")
-
-    # הכנת נתונים לתצוגת ה-JS העצמאית
-    grouped['logos_html'] = grouped['makes_list'].apply(get_logos_html)
-    grouped['formatted_date'] = grouped['datetime'].dt.strftime('%d/%m/%Y %H:%M')
-
-    return grouped
-
-
-def create_pro_scatter(df_clean):
-    """מייצרת את קנבס הגרף עם הנקודות וזום אינטראקטיבי מלא"""
-
-    num_rows = len(df_clean['display_name'].unique())
-    dynamic_height = max(450, num_rows * 80)
-
-    fig = px.scatter(
-        df_clean, x='datetime', y='display_name',
-        size='count',
-        color='display_name',
-        text='bubble_text',
-        # הוספת הנתונים החדשים למערך הנסתר (אינדקסים נשמרים תואמים ל-JS בדשבורד)
-        custom_data=['count', 'filenames', 'make_model', 'coords', 'city', 'logos_html', 'formatted_date'],
-        color_discrete_sequence=px.colors.qualitative.Prism,
-        size_max=35
-    )
-
-    # נטרול מלא של חלונית פלוטלי המקורית - אנחנו נשתמש ב-JS במקום!
-    fig.update_traces(
-        hoverinfo='none',
-        hovertemplate=None,
-        marker=dict(line=dict(width=2, color='white'), opacity=0.9),
-        textposition='middle center',
-        textfont=dict(size=14, color='white', family="Arial Black")
-    )
-
-    fig.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="#111217", plot_bgcolor="#111217",
-        font=dict(family="Assistant, Segoe UI, sans-serif", size=14),
-        height=dynamic_height,
-        autosize=True,
-        margin=dict(l=20, r=20, t=80, b=20),
-        title={'text': "<b>ציר זמן צילום - ממופה לפי מכשיר</b>", 'y': 0.96, 'x': 0.5,
-               'font': {'size': 24, 'color': '#00CCFF'}},
-        xaxis=dict(gridcolor='rgba(255,255,255,0.05)', title="ציר זמן"),
-        yaxis=dict(gridcolor='rgba(255,255,255,0.1)', title="", tickfont={'size': 16}),
-        showlegend=False,
-        dragmode='pan'
-    )
-    return fig
+    return df_clean
 
 
 def generate_camera_dashboard(raw_data):
-    """מריצה את כל השלבים לפי הסדר ומוציאה HTML"""
-
-    print("📊 מעבד ומקבץ נתונים...")
     df_ready = prepare_camera_data(raw_data)
-
-    if df_ready is None or len(df_ready) < 1:
-        print("🛑 כל התמונות סוננו (ללא זמן צילום תקין), לא נשארו נתונים לגרף.")
+    if df_ready is None or df_ready.empty:
         return False, ""
 
-    print("🎨 בונה גרף בועות מעוצב...")
-    fig = create_pro_scatter(df_ready)
+    # חישוב גבולות הזמן הדינמיים (הכי ישן מול הכי חדש + שוליים של שנה)
+    time_padding = pd.Timedelta(days=365)
+    limit_min = (df_ready['datetime'].min() - time_padding).isoformat()
+    limit_max = (df_ready['datetime'].max() + time_padding).isoformat()
 
-    print("✅ הגרף מוכן! מוסר בחזרה לשרת עם מנגנון Hover עצמאי.")
+    # קיבוץ הנתונים
+    grouped = df_ready.groupby(['datetime_minute', 'display_name', 'city_display', 'coords']).agg(
+        count=('filename', 'count'),
+        makes_list=('camera_make', list),
+        filenames=('filename', list),
+        datetime=('datetime', 'first')
+    ).reset_index()
 
-    html_string = fig.to_html(
-        full_html=False,
-        include_plotlyjs='cdn',
-        div_id='cyber_timeline',
-        config={'scrollZoom': True, 'displayModeBar': True}
-    )
+    grouped['logos_html'] = grouped['makes_list'].apply(get_logos_html)
 
-    # === הזרקת מנוע החלון הצף העצמאי שלנו (JS) לתוך תוצר הפייתון ===
-    custom_tooltip_js = """
+    groups = []
+    items = []
+    added_groups = set()
+
+    CYBER_COLORS = ["#00CCFF", "#FF3366", "#39FF14", "#FFCC00", "#B026FF", "#00FFCC", "#FF9900", "#FF00FF"]
+    device_colors = {}
+    dynamic_css = ""
+
+    for idx, row in grouped.iterrows():
+        display_name = str(row['display_name'])
+        dt = row['datetime']
+        coords = row['coords']
+        city = str(row['city_display'])
+        count = row['count']
+        logos_html = row['logos_html']
+
+        filenames_str = " ".join(row['filenames']).lower()
+
+        # יצירת קלאס ייחודי לשורה שלמה
+        group_class = "group_" + re.sub(r'[^a-zA-Z0-9]', '_', display_name).lower()
+
+        if display_name not in device_colors:
+            color = CYBER_COLORS[len(device_colors) % len(CYBER_COLORS)]
+            device_colors[display_name] = color
+
+            # 🛑 עוקף Vis.js: העיצוב יורד ממעטפת השורה היישר אל העיגולים והאגדים שבתוכה! 🛑
+            dynamic_css += f"""
+            /* צבע רקע השורה ותווית המכשיר */
+            .vis-group.{group_class} {{ background-color: {hex_to_rgba(color, 0.04)} !important; border-bottom: 1px solid rgba(255,255,255,0.03) !important; }}
+            .vis-label.{group_class} {{ border-left: 5px solid {color} !important; background-color: {hex_to_rgba(color, 0.08)} !important; color: white !important; }}
+
+            /* עיצוב הנקודה הבודדת (Dot) באותה השורה */
+            .vis-group.{group_class} .vis-item .vis-dot {{
+                border-color: {color} !important;
+                background-color: {hex_to_rgba(color, 0.2)} !important;
+                box-shadow: 0 0 18px {hex_to_rgba(color, 0.9)} !important;
+            }}
+            .vis-group.{group_class} .vis-item:hover .vis-dot {{
+                box-shadow: 0 0 25px {color} !important;
+            }}
+
+            /* אנימציית נשימה/הבהוב מותאמת אישית לצבע השורה */
+            @keyframes pulse_{group_class} {{
+                0% {{ box-shadow: inset 0 0 5px {hex_to_rgba(color, 0.6)}, 0 0 8px {hex_to_rgba(color, 0.4)}; transform: scale(1); }}
+                50% {{ box-shadow: inset 0 0 15px {color}, 0 0 20px {hex_to_rgba(color, 0.8)}; transform: scale(1.1); }}
+                100% {{ box-shadow: inset 0 0 5px {hex_to_rgba(color, 0.6)}, 0 0 8px {hex_to_rgba(color, 0.4)}; transform: scale(1); }}
+            }}
+
+            /* פתרון ה"עיגולים הלבנים": עיצוב האגד (Cluster) מתבצע ע"י ירושה מהשורה - שקיפות, צבע והבהוב! */
+            .vis-group.{group_class} .vis-item.vis-cluster {{
+                background-color: {hex_to_rgba(color, 0.15)} !important; 
+                color: {color} !important; 
+                border: 1px solid {hex_to_rgba(color, 0.6)} !important; 
+                animation: pulse_{group_class} 2s infinite ease-in-out !important; 
+            }}
+            .vis-group.{group_class} .vis-item.vis-cluster:hover {{
+                background-color: {hex_to_rgba(color, 0.5)} !important; 
+                color: white !important; 
+                box-shadow: 0 0 25px {color} !important; 
+                animation: none !important; 
+                transform: scale(1.2) !important;
+            }}
+            """
+
+        color = device_colors[display_name]
+
+        if group_class not in added_groups:
+            groups.append({
+                "id": group_class,
+                "content": f"<div style='padding: 15px 5px; min-height: 30px; display: flex; align-items: center; justify-content: center;'><b style='color: {color}; font-size: 15px; text-shadow: 0 0 8px {hex_to_rgba(color, 0.6)};'>{display_name}</b></div>",
+                "className": group_class  # מגדיר את הקלאס לשורה כולה
+            })
+            added_groups.add(group_class)
+
+        item_html = f"<span style='color: white; font-weight: bold; font-size: 13px; margin-left: 5px; text-shadow: 1px 1px 2px #000;'>{count} תמונות</span>" if count > 1 else ""
+
+        hover_html = f"""
+        <div class="cyber-tooltip">
+            <div style="display:flex; justify-content:center; margin-bottom:12px;">{logos_html}</div>
+            <div style="font-size:18px; font-weight:bold; color:#39ff14; margin-bottom: 10px; border-bottom: 1px solid #1a365d; padding-bottom: 8px;">
+                {display_name}
+            </div>
+            <div style="margin-bottom: 8px; font-size: 16px;">📅 <b style="color:#fff;">{dt.strftime('%d/%m/%Y | %H:%M')}</b></div>
+            <div style="margin-bottom: 8px; font-size: 16px;">🏙️ <b style="color:#fff;">{city}</b></div>
+            <div style="font-size: 14px; color: #8b949e; margin-top: 8px;">📍 {coords}</div>
+            <div style="font-size: 16px; color: #fff; margin-top: 10px; border-top: 1px dashed #1a365d; padding-top: 10px;">📸 סך כל התמונות בנקודה זו: <b>{count}</b></div>
+        </div>
+        """
+
+        items.append({
+            "id": idx + 1,
+            "group": group_class,
+            "start": dt.isoformat(),
+            "content": item_html,
+            "title": hover_html,
+            "type": "point",
+            "search_city": city,
+            "search_device": display_name,
+            "search_text": (filenames_str + " " + city + " " + display_name).lower(),
+            "className": group_class
+        })
+
+    groups_json = json.dumps(groups)
+    items_json = json.dumps(items)
+
+    html_string = f"""
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+    <link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+
+    <style>
+        .vis-timeline {{ border: 1px solid #1a365d; border-radius: 10px; font-family: 'Segoe UI', sans-serif; background-color: #06142e; overflow: hidden; }}
+        .vis-group {{ background-image: linear-gradient(to bottom, transparent 49%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.08) 51%, transparent 52%); }}
+
+        /* מבנה בסיס לנקודה (Dot) - הגדלנו ל-8 פיקסלים */
+        .vis-item .vis-dot {{
+            border-width: 8px !important;
+            border-radius: 50% !important;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }}
+
+        .vis-item:hover .vis-dot {{
+            transform: scale(1.4);
+        }}
+
+        /* מבנה בסיס לאגד (Cluster) - עגול, קומפקטי, ותומך ביישור אמצע למספר */
+        .vis-item.vis-cluster {{ 
+            font-weight: bold !important; 
+            border-radius: 50% !important; 
+            min-width: 32px !important;
+            height: 32px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 14px !important; 
+            box-sizing: border-box !important;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }}
+
+        /* ביטול הפדינג הפנימי של הטקסט בתוך האגד כדי שהמספר יהיה ממורכז */
+        .vis-item.vis-cluster .vis-item-content {{
+            padding: 0 !important;
+        }}
+
+        /* חלונית הריחוף המעוצבת */
+        .vis-tooltip {{ background-color: transparent !important; border: none !important; padding: 0 !important; overflow: visible !important; }}
+        .cyber-tooltip {{
+            direction: rtl; text-align: right; background: rgba(11, 31, 64, 0.98); 
+            padding: 20px; border-radius: 10px; border: 2px solid #39ff14; color: white; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.9); width: max-content; min-width: 280px;
+            max-width: 450px; white-space: normal;
+        }}
+
+        .vis-time-axis .vis-text {{ color: #8b949e; font-weight: bold; font-size: 14px; }}
+        .vis-labelset .vis-label {{ color: white !important; display:flex; align-items:center; justify-content:center; }}
+        .vis-time-axis .vis-grid.vis-minor {{ border-color: rgba(255, 255, 255, 0.07); }}
+        .vis-time-axis .vis-grid.vis-major {{ border-color: rgba(255, 255, 255, 0.2); }}
+
+        /* הזרקת בלוקי ה-CSS הדינמיים (אנימציות, צבעים ושקיפויות) ישירות מהפייתון! */
+        {dynamic_css}
+    </style>
+
+    <div id="vis-graph-container" style="width: 100%; height: 700px; direction: ltr;"></div>
+
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var myPlot = document.getElementById('cyber_timeline');
-        if(!myPlot) return;
+        moment.locale('he');
 
-        // יצירת החלון הצף העצמאי
-        var tooltip = document.getElementById('cyber-tooltip');
-        if(!tooltip) {
-            tooltip = document.createElement('div');
-            tooltip.id = 'cyber-tooltip';
-            tooltip.style.position = 'fixed';
-            tooltip.style.display = 'none';
-            tooltip.style.pointerEvents = 'none';
-            tooltip.style.zIndex = '10000';
-            tooltip.style.background = 'rgba(11, 31, 64, 0.95)';
-            tooltip.style.border = '1px solid #39ff14';
-            tooltip.style.borderRadius = '8px';
-            tooltip.style.padding = '15px';
-            tooltip.style.color = '#c9d1d9';
-            tooltip.style.fontFamily = 'Assistant, "Segoe UI", sans-serif';
-            tooltip.style.textAlign = 'right';
-            tooltip.style.direction = 'rtl';
-            tooltip.style.boxShadow = '0 4px 15px rgba(0,0,0,0.5)';
-            tooltip.style.minWidth = '220px';
-            document.body.appendChild(tooltip);
-        }
+        window.timelineSearchData = {{
+            items: {items_json},
+            groups: {groups_json}
+        }};
 
-        // האזנה לאירוע ריחוף של פלוטלי ובניית התוכן
-        myPlot.on('plotly_hover', function(data){
-            var pt = data.points[0];
-            var cd = pt.customdata;
-            if(!cd) return;
+        var groups = new vis.DataSet(window.timelineSearchData.groups);
+        var items = new vis.DataSet(window.timelineSearchData.items);
+        var container = document.getElementById('vis-graph-container');
 
-            // cd[0]=count, cd[1]=filenames, cd[2]=make_model, cd[3]=coords, cd[4]=city, cd[5]=logos_html, cd[6]=formatted_date
-            var html = `
-                <div style="display:flex; justify-content:center; margin-bottom:10px;">${cd[5]}</div>
-                <div style="font-size:16px; font-weight:bold; color:#00CCFF; margin-bottom:5px;">${cd[2]}</div>
-                <div style="margin-bottom:3px;">📅 ${cd[6]}</div>
-                <div style="margin-bottom:3px;">📍 ${cd[3]} (${cd[4]})</div>
-                <div style="margin-bottom:8px; border-bottom: 1px dashed #1a365d; padding-bottom: 8px; margin-top: 8px;">📸 <b>סך כל התמונות בנקודה זו: ${cd[0]}</b></div>
-                <div style="font-size:11px; color:#8b949e; line-height:1.4;">${cd[1]}</div>
-            `;
-            tooltip.innerHTML = html;
-            tooltip.style.display = 'block';
+        var options = {{
+            locale: 'he', 
+            groupOrder: 'id',
+            orientation: 'top',
+            editable: false,
+            height: '700px', 
+            margin: {{ item: 10, axis: 10 }},
+            stack: false, 
+            zoomMin: 1000 * 60 * 60,
+            xss: {{ disabled: true }},
 
-            // מיקום דינמי שמונע חריגה מגבולות המסך
-            var tooltipRect = tooltip.getBoundingClientRect();
-            var x = data.event.clientX + 15;
-            var y = data.event.clientY + 15;
+            min: '{limit_min}',
+            max: '{limit_max}',
 
-            if (x + tooltipRect.width > window.innerWidth) {
-                x = data.event.clientX - tooltipRect.width - 15;
-            }
-            if (y + tooltipRect.height > window.innerHeight) {
-                y = data.event.clientY - tooltipRect.height - 15;
-            }
+            tooltip: {{ followMouse: true, delay: 50 }},
 
-            tooltip.style.left = x + 'px';
-            tooltip.style.top = y + 'px';
-        });
+            cluster: {{
+                titleTemplate: "<div class='cyber-tooltip' style='min-width: auto; text-align: center; font-size: 18px; padding: 15px;'>📸 סך הכל <b>{{count}}</b> תמונות בנקודה זו</div>",
+                clusterCriteria: function(firstItem, secondItem) {{
+                    return firstItem.group === secondItem.group;
+                }}
+            }}
+        }};
 
-        myPlot.on('plotly_unhover', function(data){
-            tooltip.style.display = 'none';
-        });
-    });
+        var timeline = new vis.Timeline(container, items, groups, options);
+
+        window.cyberTimeline = timeline;
+        window.cyberTimelineItems = items;
+        window.cyberTimelineOriginalData = window.timelineSearchData.items;
+
+        window.applyTimelineFilterFromHeader = function(start, end) {{
+            if(start && end) {{
+                timeline.setWindow(start, end, {{animation: true}});
+            }}
+        }};
+
+        window.resetTimelineZoomFromHeader = function() {{
+            timeline.fit({{animation: true}});
+        }};
     </script>
     """
-
-    html_string += custom_tooltip_js
     return True, html_string
-
-
-# ==========================================
-# אזור ההפעלה
-# ==========================================
-if __name__ == "__main__":
-
-    from extractor import extract_all
-
-    MY_PHOTOS_PATH = r"C:/Intel/pycharm/pythonProject12/images"
-    print("מתחיל בדיקה מקומית...")
-
-    test_data = extract_all(MY_PHOTOS_PATH)
-
-    success, html_result = generate_camera_dashboard(test_data)
-
-    if success:
-        print("✅ הגרף נוצר בהצלחה בזיכרון!")
-
-        with open("test_timeline.html", "w", encoding="utf-8") as f:
-            f.write(html_result)
-    else:
-        print("🛑 הבדיקה נכשלה או שאין מספיק נתונים (חזר False).")
