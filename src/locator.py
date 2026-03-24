@@ -1,14 +1,18 @@
 from geopy.geocoders import Nominatim
 import time
+import threading # ייבוא מנגנון הרמזור
 
 cities_cache = {}
-geolocator = Nominatim(user_agent="cyber_image_intel_app_yair")
 
+# הוספנו "אימייל" מזויף. השרתים של Nominatim חוסמים מהר יותר מי שלא מספק אימייל.
+geolocator = Nominatim(user_agent="cyber_image_intel_app_yair_v1.0 (admin@cyber-intel.com)")
+
+# יצירת המנעול הגלובלי (הרמזור שלנו)
+api_lock = threading.Lock()
 
 def is_in_bbox(lat, lon, bbox):
     min_lat, max_lat, min_lon, max_lon = map(float, bbox)
     return (min_lat <= lat <= max_lat) and (min_lon <= lon <= max_lon)
-
 
 def get_city_and_district(lat, lon):
     # שומר השער מבוסס None
@@ -22,10 +26,13 @@ def get_city_and_district(lat, lon):
 
     # הליכה לאינטרנט
     try:
-        time.sleep(1)
-
-        # התוספות שלנו: zoom=14 לדיוק מוניציפלי, ו-timeout=10 כדי שהשרת האיטי לא יוותר!
-        location = geolocator.reverse((lat, lon), exactly_one=True, language='he', zoom=14, timeout=10)
+        # נעילת הגישה: רק תהליך אחד (Thread) יכול להיכנס לבלוק הזה בכל רגע נתון!
+        with api_lock:
+            # המתנה בטוחה של 1.2 שניות בין כל בקשה ובקשה
+            time.sleep(1.2) 
+            
+            # התוספות שלנו: zoom=14 לדיוק מוניציפלי, ו-timeout=10
+            location = geolocator.reverse((lat, lon), exactly_one=True, language='he', zoom=14, timeout=10)
 
         if location and location.raw.get('address'):
             address = location.raw['address']
@@ -34,8 +41,7 @@ def get_city_and_district(lat, lon):
             district = address.get('state_district') or address.get('state') or "מחוז לא ידוע"
 
             # שליפת עיר, עיירה, מועצה, או שטח פתוח כגיבוי אחרון
-            city = address.get('city') or address.get('town') or address.get('village') or address.get(
-                'county') or f"שטח פתוח ({district})"
+            city = address.get('city') or address.get('town') or address.get('village') or address.get('county') or f"שטח פתוח ({district})"
 
             bbox = location.raw.get('boundingbox')
 
