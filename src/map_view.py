@@ -11,10 +11,45 @@ map_view.py - יצירת מפה אינטראקטיבית
 4. הסרת fake_data מגוף הקובץ - הועבר ל-if __name__
 5. תיקון color_index - היה מתקדם על כל תמונה במקום רק על מכשיר חדש
 6. הוספת מקרא מכשירים
+7. הוספת לוגואים דינמיים של יצרניות (כמו בציר הזמן) לתוך ה-Popup
 """
 from extractor import *
 import folium
 from folium.plugins import MarkerCluster
+import base64
+from pathlib import Path
+
+# === מנוע שליפת הלוגואים (יובא מציר הזמן) ===
+BASE_DIR = Path(__file__).resolve().parent
+ICONS_DIR = BASE_DIR / "icons"
+
+LOGO_FILES = {
+    "Apple": "Apple-Logo.png",
+    "Samsung": "Samsung-Logo-2.png",
+    "Canon": "Canon-Logo.png",
+    "LG Electronics": "LG-Logo.png",
+    "Xiaomi": "Xiaomi-logo.png",
+    "Unknown": "purepng.com-camera-iconsymbolsiconsapple-iosiosios-8-iconsios-8-72152259602494tzv.png"
+}
+LOGO_FILES_LOWER = {key.lower(): value for key, value in LOGO_FILES.items()}
+
+
+def get_device_logo_b64(make):
+    """מקבל יצרן (Make) ומחזיר את הלוגו בפורמט Base64 להטמעה ישירה במפה"""
+    make_lower = str(make).lower()
+    logo_key = make_lower if make_lower in LOGO_FILES_LOWER else "unknown"
+    full_path = ICONS_DIR / LOGO_FILES_LOWER[logo_key]
+
+    if full_path.exists():
+        try:
+            with open(full_path, "rb") as img_file:
+                return "data:image/png;base64," + base64.b64encode(img_file.read()).decode('utf-8')
+        except Exception:
+            return None
+    return None
+
+
+# ============================================
 
 def sort_by_time(arr):
     """
@@ -52,7 +87,7 @@ def create_map(images_data):
     # אי אפשר לחשב מרכז מפה (זה יגרום לשגיאת חלוקה באפס).
     # לכן אנחנו עוצרים כאן ומחזירים הודעת שגיאה נקייה ומעוצבת.
     if not gps_images:
-        return False , ""
+        return False, ""
 
     # 2. סידור כרונולוגי:
     # קוראים לפונקציית העזר שלנו כדי שהתמונות יופיעו בצורה מסודרת.
@@ -105,14 +140,38 @@ def create_map(images_data):
         # שולפים מתוך המילון את הצבע שנשמר למכשיר הספציפי הזה.
         color = device_colors[device_name]
 
+        # === שליפת תמונת הלוגו ===
+        logo_b64 = get_device_logo_b64(make)
+        if logo_b64:
+            logo_img_html = f"<div style='background-color:#ffffff; padding:3px; border-radius:4px; margin-left:10px; display:flex; align-items:center;'><img src='{logo_b64}' style='height:25px; width:auto; display:block;' /></div>"
+        else:
+            logo_img_html = ""
+
         # 6. בניית חלונית מידע קופצת (Popup):
-        # בונים חלונית HTML מעוצבת שתוצג כשילחצו על הסמן במפה.
-        # שימוש ב-direction:ltr מבטיח שהטקסט באנגלית ייושר נכון לשמאל.
+        # הוספנו את הלוגו לצד הטקסט של המכשיר והזמן
         popup_content = f"""
-        <div style='direction:ltr; font-family:sans-serif;'>
-            <b>File:</b> {img.get("filename", "Unknown")}<br>
-            <b>Device:</b> {device_name}<br>
-            <b>Time:</b> {img.get("datetime", "N/A")}
+        <div style='direction:ltr; font-family:sans-serif; text-align:center; min-width: 180px;'>
+            <b style='color:#0078A8;'>{img.get("filename", "Unknown")}</b><br>
+
+            <div class="cyber-map-popup-img" data-filename="{img.get("filename", "")}" style="margin: 8px 0; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #e9ecef; border-radius: 5px;">
+                 <i class="fas fa-cloud-download-alt fa-fade" style="color: #888; font-size: 24px;"></i>
+                 <span style="font-size: 11px; color: #888; margin-top: 5px;">ממתין לסנכרון...</span>
+            </div>
+
+            <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 5px;">
+                {logo_img_html}
+                <div style="text-align: left;">
+                    <b>Device:</b> {device_name}<br>
+                    <b>Time:</b> {img.get("datetime", "N/A")}
+                </div>
+            </div>
+        </div>
+        """
+
+        tooltip_content = f"""
+        <div class="cyber-map-tooltip-img" data-filename="{img.get("filename", "")}" style="text-align:center; min-width: 120px;">
+            <b>{img.get("filename", "")}</b><br>
+            <div style="margin-top: 5px;"><i class="fas fa-image fa-fade" style="color: #888;"></i></div>
         </div>
         """
 
@@ -121,7 +180,7 @@ def create_map(images_data):
         folium.Marker(
             location=[img["latitude"], img["longitude"]],
             popup=folium.Popup(popup_content, max_width=250),
-            tooltip=img.get("filename", "View"),
+            tooltip=folium.Tooltip(tooltip_content),
             icon=folium.Icon(color=color, icon="camera", prefix="fa")
         ).add_to(marker_cluster)
 
